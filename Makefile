@@ -70,3 +70,19 @@ incs:
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 
+all: ini
+
+ini: deps dirs
+	$(CC) $(CCFLAGS) $(LDFLAGS) @ini.lst -oINI -create-app \
+		-subtype=dotn $(CZFLAGS)
+	$(MV) INI $(BUILD_DIR)/INI.DOT
+
+install: install_ini
+
+install_ini:
+	$(CP) $(BUILD_DIR)/INI.DOT $(INSTALL_BASE)/dot/INI
+
+q_ini: ini install_ini
+
+uninstall:
+	$(RM) $(INSTALL_BASE)/dot/INI

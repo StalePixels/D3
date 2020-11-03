@@ -1,1 +1,1 @@
-#define D3_VER	    "
+#define D3_VER	       "

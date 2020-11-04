@@ -8,7 +8,7 @@ RELEASE_DIR ?= ./RELEASE-$(NAME)
 INSTALL_BASE ?= /Volumes/devnext
 INSTALL_DIR ?= $(INSTALL_BASE)/$(NAME)
 
-Z88DK_CRT = 0
+Z88DK_CRT = 1
 
 #DEBUGFLAGS := --list --c-code-in-asm
 

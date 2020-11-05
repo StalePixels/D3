@@ -8,7 +8,10 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .EVERY  A simple job scheduler.  Will set NextRex 0x7F if the schedule is due.
 
-Version 0.0.2
+Changelog
 -
+* V 0.1.0         First public,   with INI
+* V 0.2.0         Second public,  with EVERY
+
 
 

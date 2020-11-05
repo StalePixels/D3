@@ -4,10 +4,12 @@
 
 #include "ini_common.h"
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 
 static char *ini_tmp;
 bool ini_set_one(const char *filename, const char *key, const char *value) {
+    errno = 0;
     ini_value = 0;
     bool entry_exists = false;
     bool file_exists = true;
@@ -33,7 +35,6 @@ bool ini_set_one(const char *filename, const char *key, const char *value) {
         if(!entry_exists) {
             ini_key = strtok(ini_tmp, "=");
             if (!strcmp(ini_key, key)) {
-                printf("!");
                 ini_value = strtok(NULL, "\n");
 
                 esxdos_f_write(ini_out, key, strlen(key));

@@ -26,6 +26,8 @@ const char *tmp_filename[] = "/TMP/INI$$$$$.TMP";
 
 char *user_key;
 
+uint8_t errno_filter_none[] = { 0 };
+
 static unsigned char old_cpu_speed;
 static void at_exit() {
     // Restore CPU Speed
@@ -52,6 +54,9 @@ int main(int argc, char** argv) {
 
     // HANDLE SWITCHES HERE, maybe?
 
+    // Tell the INI parter that "no errors are acceptable"
+    errno_filter = (uint8_t*)&errno_filter_none;
+
     if(argc==4) {
         if (ini_set_one(argv[1], argv[2], argv[3])) {
             if (verbose) printf("UPDATED \"%s\" = \"%s\"\n", argv[2], argv[3]);
@@ -68,9 +73,8 @@ int main(int argc, char** argv) {
             printf("%s\n", ini_value);
         }
         else {
-            printf("V %s not found\n", argv[2]);
+            if (verbose) printf("KEY \"%s\" not found\n", argv[2]);
         }
     }
-
     exit(errno);
 }

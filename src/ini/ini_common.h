@@ -15,6 +15,7 @@ extern char ini_line[512];
 extern char *ini_key;
 extern char *ini_value;
 extern char *tmp_filename[];
+extern uint8_t *errno_filter;
 extern uint32_t ini_char;
 
 void ini_file_read(const char *filename);

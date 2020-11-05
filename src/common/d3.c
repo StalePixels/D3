@@ -3,6 +3,7 @@
 //
 
 #include "d3.h"
+#include "build.h"
 #include "ula.h"
 
 #include <z80.h>
@@ -16,5 +17,8 @@
 
 void d3_logo() {
     zx_cls(PAPER_WHITE); printAt(0,0);
-    printf("D's Developer Dotcommands\n");
+    printf(" _    _          ###, ###\n"
+           "[_)s [_)eveloper #  #  _#\n"
+           "[_)otcommands    #  #   #\n"
+           "          v" D3_VER " ###' ###\n");
 }

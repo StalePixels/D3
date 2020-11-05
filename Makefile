@@ -27,7 +27,8 @@ RM := rm -rfv
 LSH := ls -larth
 CP := @cp -rv
 MV := @mv -v
-FIGLET := @`which figlet`
+#FIGLET := echo
+FIGLET := `which figlet`
 CAT := @`which cat`
 SED := @`which sed`
 LS := ls -l@k
@@ -66,7 +67,7 @@ incs: dirs
 	$(ECHO) "#" > $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BUILD >> $(TMP_DIR)/BANNER
 	$(ECHO) " RUNNING" >> $(TMP_DIR)/BANNER
-	$(CAT)  $(TMP_DIR)/BANNER | figlet
+	$(CAT)  $(TMP_DIR)/BANNER | $(FIGLET)
 
 	cat templates/build_top.h > src/common/build.h
 

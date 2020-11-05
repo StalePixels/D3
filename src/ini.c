@@ -35,7 +35,7 @@ static void at_exit() {
 }
 
 void exit_with_help() {
-    d3_logo();
+    d3_logo(); printf(" INI\n");
     printf("\n\nexit_with_help\n\n");
     exit(errno);
 }

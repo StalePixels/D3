@@ -36,12 +36,8 @@ static void at_exit() {
 }
 
 void exit_with_help() {
-    if (counter < 2) {
-        printf("COUNTER TOO SMALL");
-    } else {
-        d3_logo();
-        printf("argc");
-    }
+    d3_logo(); printf(" EVERY\n");
+    printf("");
     exit(errno);
 }
 

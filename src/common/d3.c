@@ -20,5 +20,5 @@ void d3_logo() {
     printf(" _    _          ###, ###\n"
            "[_)s [_)eveloper #  #  _#\n"
            "[_)otcommands    #  #   #\n"
-           "          v" D3_VER " ###' ###\n");
+           "          v" D3_VER " ###' ###");
 }

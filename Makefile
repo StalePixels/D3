@@ -44,6 +44,13 @@ clean:
 	$(RM) $(NAME).map
 	$(RM) $(NAME)_*.bin
 	$(RM) cmake-build-debug
+	$(RM) *.map
+	$(RM) *_MAIN.bin
+	$(RM) *_CODE.bin
+	$(RM) *_UNASSIGNED.bin
+	$(RM) *_UNASSIGNED.bin
+
+rel-clean: clean
 	$(RM) $(RELEASE_DIR)
 
 deps: incs
@@ -80,7 +87,7 @@ incs: dirs
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 
-release: install every
+release: ini every
 	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
 

@@ -44,7 +44,7 @@ clean:
 	$(RM) $(NAME).map
 	$(RM) $(NAME)_*.bin
 	$(RM) cmake-build-debug
-	$(RM) RELEASE/*
+	$(RM) $(RELEASE_DIR)
 
 deps: incs
 	$(ECHO) $(NAME) > NAME
@@ -52,6 +52,7 @@ deps: incs
 dirs:
 	$(MKDIR) $(BUILD_DIR)
 	$(MKDIR) $(TMP_DIR)
+	$(MKDIR) $(RELEASE_DIR)
 
 incs: dirs
 	$(ECHO) `git shortlog -s -n| grep Rimron| cut -b-7|sed -e 's/^[[:space:]]*//'` > $(TMP_DIR)/BUILD
@@ -78,6 +79,10 @@ incs: dirs
 	$(CAT) VERSION > $(TMP_DIR)/BANNER
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
+
+release: install every
+	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
+	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
 
 #
 # INI
@@ -116,3 +121,5 @@ uninstall_every:
 	$(RM) $(INSTALL_BASE)/dot/EVERY
 
 uninstall: uninstall_every
+
+

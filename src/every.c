@@ -35,9 +35,22 @@ static void at_exit() {
     intrinsic_ei();
 }
 
+const char *help_text[] = {
+        "\nSimple Scheduler",
+        "================",
+        "\n Usage examples",
+        "\nName: default, \"True\" every 10th",
+        " .EVERY 10",
+        "\nName: ESP, \"True\" every 5th",
+        " .EVERY ESP 5",
+        "\nNextReg 0x7F is 1 on True else 0",
+        "\nSee http://zxn.gg/every for more"
+};
+
 void exit_with_help() {
     d3_logo(); printf(" EVERY\n");
-    printf("");
+    for(uint8_t help=0;help<8;help++)
+        printf("%s\n", help_text[help]);
     exit(errno);
 }
 

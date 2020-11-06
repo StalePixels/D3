@@ -49,7 +49,7 @@ const char *help_text[] = {
 
 void exit_with_help() {
     d3_logo(); printf(" EVERY\n");
-    for(uint8_t help=0;help<8;help++)
+    for(uint8_t help=0;help<9;help++)
         printf("%s\n", help_text[help]);
     exit(errno);
 }

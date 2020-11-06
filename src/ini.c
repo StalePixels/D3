@@ -34,9 +34,22 @@ static void at_exit() {
     ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
 }
 
+const char *help_text[] = {
+        "\nINI/CFG tool",
+          "============",
+        "\n Usage examples",
+        "\nGET a value",
+        ".INI /path/file.ini key",
+        "\nSET a value",
+        ".INI /path/file.ini key value",
+        "\nSee http://zxn.gg/ini for more",
+
+};
+
 void exit_with_help() {
     d3_logo(); printf(" INI\n");
-    printf("\n\nexit_with_help\n\n");
+    for(uint8_t help=0;help<8;help++)
+        printf("%s\n", help_text[help]);
     exit(errno);
 }
 

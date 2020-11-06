@@ -8,7 +8,7 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .EVERY  Job scheduler.  Will set NextRex 0x7F if the schedule is due.
 
-.UNTAR  POSIX compliant ESXDOS verion of UNTAR.
+.UNTAR  POSIX compliant ESXDOS version of UNTAR.
 
 Notable Changes
 -

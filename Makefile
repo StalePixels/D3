@@ -35,7 +35,7 @@ LS := ls -l@k
 VERSION := `cat VERSION`
 DATE := `which date`
 
-default: q_ini
+default: q_every
 
 all: ini every
 

@@ -8,7 +8,7 @@ RELEASE_DIR ?= ./RELEASE-$(NAME)
 INSTALL_BASE ?= /Volumes/devnext
 INSTALL_DIR ?= $(INSTALL_BASE)/$(NAME)
 
-Z88DK_CRT = 1
+Z88DK_CRT = 30
 
 #DEBUGFLAGS := --list --c-code-in-asm
 
@@ -35,7 +35,7 @@ LS := ls -l@k
 VERSION := `cat VERSION`
 DATE := `which date`
 
-default: q_every
+default: q_untar
 
 all: ini every
 
@@ -88,15 +88,18 @@ incs: dirs
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 
-release: ini every
+release: ini every untar
 	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
+	$(CP) $(BUILD_DIR)/UNTAR.DOT $(RELEASE_DIR)/UNTAR
+
+uninstall: uninstall_every uninstall_ini uninstall_untar
 
 #
 # INI
 #
 ini: deps dirs
-	$(CC) $(CCFLAGS) $(LDFLAGS) @ini.lst -oINI -create-app \
+	$(CC) $(CCFLAGS) $(LDFLAGS) @src/ini.lst -oINI -create-app \
 		-subtype=dotn $(CZFLAGS)
 	$(MV) INI $(BUILD_DIR)/INI.DOT
 
@@ -114,7 +117,7 @@ uninstall_ini:
 # EVERY
 #
 every: deps dirs
-	$(CC) $(CCFLAGS) $(LDFLAGS) @every.lst -oEVERY -create-app \
+	$(CC) $(CCFLAGS) $(LDFLAGS) @src/every.lst -oEVERY -create-app \
 		-subtype=dotn $(CZFLAGS)
 	$(MV) EVERY $(BUILD_DIR)/EVERY.DOT
 
@@ -128,6 +131,22 @@ q_every: every install_every
 uninstall_every:
 	$(RM) $(INSTALL_BASE)/dot/EVERY
 
-uninstall: uninstall_every
+#
+# UNTAR
+#
+untar: deps dirs
+	$(CC) $(CCFLAGS) $(LDFLAGS) @src/untar.lst -oUNTAR -create-app \
+		-subtype=dotn $(CZFLAGS)
+	$(MV) UNTAR $(BUILD_DIR)/UNTAR.DOT
+
+install: install_untar
+
+install_untar:
+	$(CP) $(BUILD_DIR)/UNTAR.DOT $(INSTALL_BASE)/dot/UNTAR2
+
+q_untar: untar install_untar
+
+uninstall_untar:
+	$(RM) $(INSTALL_BASE)/dot/UNTAR2
 
 

@@ -10,9 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common/build.h"
 #include "common/d3.h"
+#include "common/startup.h"
 #include "ini/ini_common.h"
 
 unsigned char file_in, file_out;
@@ -27,13 +29,6 @@ int stored_value;
 char user_buffer[8];
 
 uint8_t errno_file_not_found[] = { 5, 0 };
-
-static unsigned char old_cpu_speed;
-static void at_exit() {
-    // Restore CPU Speed
-    ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
-    intrinsic_ei();
-}
 
 const char *help_text[] = {
         "\nSimple Scheduler",
@@ -55,14 +50,7 @@ void exit_with_help() {
 }
 
 int main(int argc, char** argv) {
-    intrinsic_di();
-    // Store CPU speed
-    old_cpu_speed = ZXN_READ_REG(REG_TURBO_MODE);
-    // Set CPU speed to 28Mhz
-    ZXN_NEXTREG(REG_TURBO_MODE, 3);
-    // Restore to original atexit
-    atexit(at_exit);
-    errno = 0;
+    startup();
 
     // Two args, minimum
     if(argc < 2) exit_with_help();

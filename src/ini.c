@@ -2,8 +2,6 @@
 // Created by D Rimron-Soutter on 3/11/2020.
 //
 
-#pragma output CLIB_MALLOC_HEAP_SIZE = 1024
-
 #include <z80.h>
 #include <arch/zxn.h>
 #include <intrinsic.h>
@@ -12,10 +10,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common/build.h"
-#include "ini/ini_common.h"
 #include "common/d3.h"
+#include "common/startup.h"
+
+#include "ini/ini_common.h"
 
 uint16_t counter = 0;
 uint16_t old_counter = 0;
@@ -27,12 +28,6 @@ const char *tmp_filename[] = "/TMP/INI$$$$$.TMP";
 char *user_key;
 
 uint8_t errno_filter_none[] = { 0 };
-
-static unsigned char old_cpu_speed;
-static void at_exit() {
-    // Restore CPU Speed
-    ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
-}
 
 const char *help_text[] = {
         "\nINI/CFG tool",
@@ -54,13 +49,7 @@ void exit_with_help() {
 }
 
 int main(int argc, char** argv) {
-    // Store CPU speed
-    old_cpu_speed = ZXN_READ_REG(REG_TURBO_MODE);
-    // Set CPU speed to 28Mhz
-    ZXN_NEXTREG(REG_TURBO_MODE, 3);
-    // Restore to original atexit
-    atexit(at_exit);
-    errno = 0;
+    startup();
 
     // Two args, minimum
     if(argc < 3) exit_with_help();

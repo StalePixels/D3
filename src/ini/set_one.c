@@ -1,6 +1,7 @@
 //
 // Created by D Rimron-Soutter on 3/11/2020.
 //
+#pragma output CLIB_MALLOC_HEAP_SIZE = 1024
 
 #include "ini_common.h"
 #include <stdio.h>

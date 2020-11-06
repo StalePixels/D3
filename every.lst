@@ -1,7 +1,0 @@
-src/every.c
-src/ini/ini_common.c
-src/ini/get_one.c
-src/ini/get_line.c
-src/ini/set_one.c
-src/util/trim_whitespace.c
-src/common/d3.c

@@ -3,6 +3,7 @@ Changelog
 
 v0.3.1
 -
+ - NEW: /docs/CHANGELOG.md added
  - INT: Update .INI to use "create_file" util
  - INT: Update .EVERY to use "create_file" util
 

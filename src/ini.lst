@@ -4,5 +4,7 @@ ini/get_one.c
 ini/get_line.c
 ini/set_one.c
 util/trim_whitespace.c
+util/create_file.c
+util/create_dir.c
 common/d3.c
 common/startup.c

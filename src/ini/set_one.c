@@ -4,6 +4,7 @@
 #pragma output CLIB_MALLOC_HEAP_SIZE = 1024
 
 #include "ini_common.h"
+#include "../util/create_file.h"
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -19,10 +20,10 @@ bool ini_set_one(const char *filename, const char *key, const char *value) {
     if(errno==5) {
         file_exists = false;
         errno = 0;
-        ini_out = esxdos_f_open(filename, ESXDOS_MODE_W | ESXDOS_MODE_CT);
+        ini_out = create_file(filename);
     }
     else if(!errno) {
-        ini_out = esxdos_f_open(tmp_filename, ESXDOS_MODE_W | ESXDOS_MODE_CT);
+        ini_out = create_file(tmp_filename);
     }
     if(errno) exit(errno);
 

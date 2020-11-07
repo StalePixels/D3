@@ -11,6 +11,7 @@
 #include "common/build.h"
 #include "common/d3.h"
 #include "common/startup.h"
+#include "ch8/ch8show.h"
 
 #include "util/parse_octal.h"
 
@@ -44,10 +45,21 @@ int main(int argc, char **argv)
         printf("Unable to open %s\n", argv[1]);
         exit(errno);
     }
-    else {
-        ch8show(font_in);
-        esxdos_f_close(font_in);
+
+    struct esxdos_stat finfo;  // = {0,0,0,0,0};
+    esxdos_f_fstat(font_in, &finfo);
+
+    d3_logo(); printf("CH8SHOW\n");
+    printf("\nShowing Font: %18s\n\n", argv[1]);
+
+    if(finfo.size==768) {
+        ch8show(font_in, 96, 7);
     }
+    else if(finfo.size==1024) {
+        ch8show(font_in, 128, 7);
+    }
+
+    esxdos_f_close(font_in);
 
     exit(errno);
 }

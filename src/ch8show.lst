@@ -1,3 +1,4 @@
 ch8show.c
 common/d3.c
 common/startup.c
+ch8/ch8show.c

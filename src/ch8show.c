@@ -14,20 +14,18 @@
 
 #include "util/parse_octal.h"
 
-#include "untar/untar.h"
-
 const char *help_text[] = {
-        "\nUNTAR",
-        "=====",
+        "\nCH8SHOW",
+        "=======",
         "\n Usage examples",
-        "\nExtract a file",
-        ".UNTAR /path/to/file.tar",
-        "\nDetails at http://zxn.gg/untar",
+        "\nShow a font file",
+        ".CH8SHOW /path/to/file.ch8",
+        "\nDetails at http://zxn.gg/ch8show",
 
 };
 
 void exit_with_help() {
-    d3_logo(); printf(" UNTAR\n");
+    d3_logo(); printf("CH8SHOW\n");
     for(uint8_t help=0;help<6;help++)
         printf("%s\n", help_text[help]);
     exit(errno);
@@ -40,15 +38,15 @@ int main(int argc, char **argv)
     // One arg, minimum
     if(argc < 2) exit_with_help();
 
-    unsigned char tar_in = esxdos_f_open(argv[1], ESXDOS_MODE_R | ESXDOS_MODE_OE);
+    unsigned char font_in = esxdos_f_open(argv[1], ESXDOS_MODE_R | ESXDOS_MODE_OE);
 
     if(errno) {
         printf("Unable to open %s\n", argv[1]);
         exit(errno);
     }
     else {
-        untar(tar_in, argv[1]);
-        esxdos_f_close(tar_in);
+        ch8show(font_in);
+        esxdos_f_close(font_in);
     }
 
     exit(errno);

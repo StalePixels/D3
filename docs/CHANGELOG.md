@@ -1,6 +1,11 @@
 Changelog
 =
 
+v0.4.0
+-
+ - NEW: .CH8SHOW
+ - INT: Consistent splash formatting
+
 v0.3.1
 -
  - NEW: /docs/CHANGELOG.md added
@@ -24,4 +29,4 @@ v0.2.0
  
 v0.1.0
 -
-  -NEW: .INI added
+  - NEW: .INI added

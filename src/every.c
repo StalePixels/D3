@@ -39,7 +39,7 @@ const char *help_text[] = {
         "\nName: ESP, \"True\" every 5th",
         " .EVERY ESP 5",
         "\nNextReg 0x7F is 1 on True else 0",
-        "\nSee http://zxn.gg/every for more"
+        "\nDetails at http://zxn.gg/every"
 };
 
 void exit_with_help() {

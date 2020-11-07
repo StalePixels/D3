@@ -37,7 +37,7 @@ const char *help_text[] = {
         ".INI /path/file.ini key",
         "\nSET a value",
         ".INI /path/file.ini key value",
-        "\nSee http://zxn.gg/ini for more",
+        "\nDetails at http://zxn.gg/ini"
 
 };
 

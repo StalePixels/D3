@@ -88,7 +88,7 @@ incs: dirs
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 
-release: ini every untar
+release: ini every untar ch8show
 	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
 	$(CP) $(BUILD_DIR)/UNTAR.DOT $(RELEASE_DIR)/UNTAR

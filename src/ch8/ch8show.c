@@ -28,10 +28,12 @@ void ch8show(unsigned char file_in, uint8_t glyphs, uint8_t row) {
 
     while(rows) {
         for (uint8_t col = 0; col < 8; ++col) {
-            if(ascii)
+            if(ascii<32) {
+                printf("%2d= ", ascii);
+            }
+            else {
                 printf(" %c= ", ascii);
-            else
-                printf("NULL ", ascii);
+            }
 
             for (uint8_t prow = 0; prow < 8; ++prow) {
                 uint16_t addr = zx_pxy2saddr(24 + (col * 32), prow + (row * 8));

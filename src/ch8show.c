@@ -50,16 +50,17 @@ int main(int argc, char **argv)
     esxdos_f_fstat(font_in, &finfo);
 
     d3_logo(); printf("CH8SHOW\n");
-    printf("\nShowing Font: %18s\n\n", argv[1]);
+    printf("Showing Font: %18s\n\n", argv[1]);
 
     if(finfo.size==768) {
-        ch8show(font_in, 96, 7);
+        ch8show(font_in, 96, 6);
     }
     else if(finfo.size==1024) {
-        ch8show(font_in, 128, 7);
+        ch8show(font_in, 128, 6);
     }
 
     esxdos_f_close(font_in);
 
-    exit(errno);
+
+    exit(0);
 }

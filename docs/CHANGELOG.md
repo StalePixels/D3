@@ -1,6 +1,10 @@
 Changelog
 =
 
+v0.4.1
+-
+ - FIX: Formatting bug on 128glyph/UDG files
+ 
 v0.4.0
 -
  - NEW: .CH8SHOW

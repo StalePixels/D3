@@ -35,7 +35,7 @@ LS := ls -l@k
 VERSION := `cat VERSION`
 DATE := `which date`
 
-default: q_ch8show
+default: q_inkey
 
 all: ini every untar ch8show
 
@@ -93,6 +93,7 @@ release: ini every untar ch8show
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
 	$(CP) $(BUILD_DIR)/UNTAR.DOT $(RELEASE_DIR)/UNTAR
 	$(CP) $(BUILD_DIR)/CH8SHOW.DOT $(RELEASE_DIR)/CH8SHOW
+	$(CP) $(BUILD_DIR)/INKEY.DOT $(RELEASE_DIR)/INKEY
 
 uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show
 
@@ -171,5 +172,23 @@ q_ch8show: ch8show install_ch8show
 
 uninstall_ch8show:
 	$(RM) $(INSTALL_BASE)/dot/CH8SHOW
+
+#
+# INKEY
+#
+inkey: deps dirs
+	$(CC) $(CCFLAGS) $(LDFLAGS) @src/inkey.lst -oINKEY -create-app \
+		-subtype=dotn $(CZFLAGS)
+	$(MV) INKEY $(BUILD_DIR)/INKEY.DOT
+
+install: install_inkey
+
+install_inkey:
+	$(CP) $(BUILD_DIR)/INKEY.DOT $(INSTALL_BASE)/dot/INKEY
+
+q_inkey: inkey install_inkey
+
+uninstall_inkey:
+	$(RM) $(INSTALL_BASE)/dot/INKEY
 
 

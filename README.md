@@ -12,12 +12,16 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .CH8SHOW - View 768b/1k 1bit font files in ROM/UDG format
 
+.INKEY - View keycodes as returned for keys & combos from z88dk
+
 Notable Changes
 -
 * V 0.1.0         First stable public, with INI
 * V 0.2.0         Second stable public, with EVERY
 * V 0.3.0         Third stable public, with UNTAR
 * V 0.4.0         Fourth stable public, with CH8SHOW
+* V 0.4.2         Minor stable public, with INKEY
+
 
 
 

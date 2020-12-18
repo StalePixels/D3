@@ -7,5 +7,8 @@
 
 #include <stdio.h>
 
-void less(unsigned char file_in, uint8_t glyphs, uint8_t row);
+extern unsigned char err_no_memory[];
+
+void less_exit();
+void less(unsigned char text_in);
 #endif //D3_LESS_H

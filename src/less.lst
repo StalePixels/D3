@@ -2,3 +2,4 @@ less.c
 common/d3.c
 common/startup.c
 less/less.c
+less/less.asm

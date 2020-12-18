@@ -71,14 +71,22 @@ IF !DEFINED_CLIB_OPT_PRINTF_2
 ENDIF
 
 
+IF !DEFINED_CLIB_EXIT_STACK_SIZE 
+	defc	DEFINED_CLIB_EXIT_STACK_SIZE  = 1
+	defc CLIB_EXIT_STACK_SIZE  = 0x2
+	IFNDEF CLIB_EXIT_STACK_SIZE 
+	ENDIF
+ENDIF
+
+
 IF !DEFINED_CRT_printf_format
 	defc	DEFINED_CRT_printf_format = 1
-	defc CRT_printf_format = 0x40000200
+	defc CRT_printf_format = 0x00000200
 ELSE
 	UNDEFINE temp_printf_format
 	defc temp_printf_format = CRT_printf_format
 	UNDEFINE CRT_printf_format
-	defc CRT_printf_format = temp_printf_format | 0x40000200
+	defc CRT_printf_format = temp_printf_format | 0x00000200
 ENDIF
 
 
@@ -105,12 +113,12 @@ ENDIF
 
 IF !DEFINED_CRT_printf_format
 	defc	DEFINED_CRT_printf_format = 1
-	defc CRT_printf_format = 0x40000401
+	defc CRT_printf_format = 0x00000001
 ELSE
 	UNDEFINE temp_printf_format
 	defc temp_printf_format = CRT_printf_format
 	UNDEFINE CRT_printf_format
-	defc CRT_printf_format = temp_printf_format | 0x40000401
+	defc CRT_printf_format = temp_printf_format | 0x00000001
 ENDIF
 
 

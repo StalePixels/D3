@@ -107,8 +107,6 @@ ini: deps dirs
 		-subtype=dotn $(CZFLAGS)
 	$(MV) INI $(BUILD_DIR)/INI.DOT
 
-install: install_ini
-
 install_ini:
 	$(CP) $(BUILD_DIR)/INI.DOT $(INSTALL_BASE)/dot/INI
 
@@ -125,8 +123,6 @@ every: deps dirs
 	$(CC) $(CCFLAGS) $(LDFLAGS) @src/every.lst -oEVERY -create-app \
 		-subtype=dotn $(CZFLAGS)
 	$(MV) EVERY $(BUILD_DIR)/EVERY.DOT
-
-install: install_every
 
 install_every:
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(INSTALL_BASE)/dot/EVERY
@@ -145,8 +141,6 @@ untar: deps dirs
 		-subtype=dotn $(CZFLAGS)
 	$(MV) UNTAR $(BUILD_DIR)/UNTAR.DOT
 
-install: install_untar
-
 install_untar:
 	$(CP) $(BUILD_DIR)/UNTAR.DOT $(INSTALL_BASE)/dot/UNTAR
 
@@ -164,8 +158,6 @@ ch8show: deps dirs
 		-subtype=dotn $(CZFLAGS)
 	$(MV) CH8SHOW $(BUILD_DIR)/CH8SHOW.DOT
 
-install: install_ch8show
-
 install_ch8show:
 	$(CP) $(BUILD_DIR)/CH8SHOW.DOT $(INSTALL_BASE)/dot/CH8SHOW
 
@@ -182,8 +174,6 @@ inkey: deps dirs
 		-subtype=dotn $(CZFLAGS)
 	$(MV) INKEY $(BUILD_DIR)/INKEY.DOT
 
-install: install_inkey
-
 install_inkey:
 	$(CP) $(BUILD_DIR)/INKEY.DOT $(INSTALL_BASE)/dot/INKEY
 
@@ -194,12 +184,10 @@ uninstall_inkey:
 #
 # LESS
 #
-less: deps dirs
+less:
 	$(CC) $(CCFLAGS) $(LDFLAGS) @src/less.lst -oLESS -create-app \
 		-subtype=dotn $(CZFLAGS)
 	$(MV) LESS $(BUILD_DIR)/LESS.DOT
-
-install: install_less
 
 install_less:
 	$(CP) $(BUILD_DIR)/LESS.DOT $(INSTALL_BASE)/dot/LESS

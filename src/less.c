@@ -13,14 +13,16 @@
 #include "common/startup.h"
 #include "less/less.h"
 
+// One for me, and one for my wife (aka common/startup.c)
+#pragma output CLIB_EXIT_STACK_SIZE = 2
+
 const char *help_text[] = {
         "\nLESS",
-        "=======",
+        "=====",
         "\n Usage examples",
-        "\nShow a font file",
-        ".LESS /path/to/file.ch8",
+        "\nShow a test file",
+        ".LESS /path/to/file.txt",
         "\nDetails at http://zxn.gg/less",
-
 };
 
 void exit_with_help() {
@@ -37,28 +39,16 @@ int main(int argc, char **argv)
     // One arg, minimum
     if(argc < 2) exit_with_help();
 
-    unsigned char font_in = esxdos_f_open(argv[1], ESXDOS_MODE_R | ESXDOS_MODE_OE);
+    unsigned char text_in = esxdos_f_open(argv[1], ESXDOS_MODE_R | ESXDOS_MODE_OE);
 
     if(errno) {
         printf("Unable to open %s\n", argv[1]);
         exit(errno);
     }
 
-    struct esxdos_stat finfo;  // = {0,0,0,0,0};
-    esxdos_f_fstat(font_in, &finfo);
+    less(text_in);
 
-    d3_logo(); printf("LESS\n");
-    printf("Showing Font: %18s\n\n", argv[1]);
-
-    if(finfo.size==768) {
-        less(font_in, 96, 6);
-    }
-    else if(finfo.size==1024) {
-        less(font_in, 128, 6);
-    }
-
-    esxdos_f_close(font_in);
-
+    esxdos_f_close(text_in);
 
     exit(0);
 }

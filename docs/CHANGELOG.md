@@ -1,6 +1,10 @@
 Changelog
 =
 
+v0.5.0
+-
+ - NEW: .LESS added
+ 
 v0.4.2
 -
  - FIX: Verbose logging OFF by default

@@ -14,6 +14,8 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .INKEY - View keycodes as returned for keys & combos from z88dk
 
+.LESS - Less is more. A textfile pager with extra features
+
 Notable Changes
 -
 * V 0.1.0         First stable public, with INI
@@ -21,6 +23,7 @@ Notable Changes
 * V 0.3.0         Third stable public, with UNTAR
 * V 0.4.0         Fourth stable public, with CH8SHOW
 * V 0.4.2         Minor stable public, with INKEY
+* V 0.5.0         Fourth stable public, with LESS
 
 
 

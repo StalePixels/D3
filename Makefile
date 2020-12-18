@@ -88,14 +88,15 @@ incs: dirs
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 
-release: ini every untar ch8show
+release: ini every untar ch8show inkey less
 	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
 	$(CP) $(BUILD_DIR)/UNTAR.DOT $(RELEASE_DIR)/UNTAR
 	$(CP) $(BUILD_DIR)/CH8SHOW.DOT $(RELEASE_DIR)/CH8SHOW
 	$(CP) $(BUILD_DIR)/INKEY.DOT $(RELEASE_DIR)/INKEY
+	$(CP) $(BUILD_DIR)/LESS.DOT $(RELEASE_DIR)/LESS
 
-uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show
+uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_inkey uninstall_less
 
 
 #
@@ -190,5 +191,22 @@ q_inkey: inkey install_inkey
 
 uninstall_inkey:
 	$(RM) $(INSTALL_BASE)/dot/INKEY
+#
+# LESS
+#
+less: deps dirs
+	$(CC) $(CCFLAGS) $(LDFLAGS) @src/less.lst -oLESS -create-app \
+		-subtype=dotn $(CZFLAGS)
+	$(MV) LESS $(BUILD_DIR)/LESS.DOT
+
+install: install_less
+
+install_less:
+	$(CP) $(BUILD_DIR)/LESS.DOT $(INSTALL_BASE)/dot/LESS
+
+q_less: less install_less
+
+uninstall_less:
+	$(RM) $(INSTALL_BASE)/dot/LESS
 
 

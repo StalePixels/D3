@@ -14,17 +14,20 @@
 #include "../common/ula.h"
 #include "../common/d3.h"
 
-static uint8_t total_8k_pages = 2;
-uint8_t pages[225];
-static uint8_t i;  // reusable iterator
+#define MAX_PAGES       220
+
+static uint8_t total_8k_pages = 1;
+static uint8_t page_table[MAX_PAGES];
+static uint8_t ula2, ula3,
+                i;  // reusable iterator
 
 void less_exit() {
     // Free all the memory we reserved
-    total_8k_pages = 225;
+    i = total_8k_pages;
 
-    while(total_8k_pages--) {
-        if(pages[total_8k_pages]) {
-            esx_ide_bank_free(0, pages[total_8k_pages]);
+    while(i--) {
+        if(page_table[i]) {
+            esx_ide_bank_free(0, page_table[i]);
         }
     }
 }
@@ -33,24 +36,38 @@ void less(unsigned char text_in) {
     struct esxdos_stat finfo;  // = {0,0,0,0,0};
     esxdos_f_fstat(text_in, &finfo);
     atexit(less_exit);
-    memset(pages,0,225);
+    memset(page_table,0, MAX_PAGES);
 
-    total_8k_pages = 2 + (finfo.size/16384);
+    ula2 = ZXN_READ_REG(REG_MMU0 + 2);
+    ula3 = ZXN_READ_REG(REG_MMU0 + 3);
+
+    total_8k_pages = i = 1 + (finfo.size/8192);
     printf("8K pages required: %d [", total_8k_pages);
-    while(total_8k_pages) {
+    while(i) {
         // Ask OS for memory
-        pages[total_8k_pages] = esx_ide_bank_alloc(0);
+        page_table[i] = esx_ide_bank_alloc(0);
 
         // Check we got the memory we asked for
-        if(pages[total_8k_pages]==255) {
+        if(page_table[i]==255) {
             printf("!]");
             exit((int)err_no_memory);
         }
 
         // Make it down, move along around, do it all again
         printf(".");
-        --total_8k_pages;
+
+        ZXN_WRITE_MMU2(page_table[i]);
+        if(i>1) {
+            esx_f_read(text_in, 0x4000, 8192);
+        }
+        else {
+            esx_f_read(text_in, 0x4000, finfo.size % 8192);
+        }
+        ZXN_WRITE_MMU2(ula2);
+
+        --i;
     }
     printf("]");
+
 
 }

@@ -13,13 +13,13 @@
 
 #include "../common/ula.h"
 #include "../common/d3.h"
+#include "../common/liblayer3/liblayer3.h"
 
 #define MAX_PAGES       220
 
 static uint8_t total_8k_pages = 1;
 static uint8_t page_table[MAX_PAGES];
-static uint8_t ula2, ula3,
-                i;  // reusable iterator
+static uint8_t i;  // reusable iterator
 
 void less_exit() {
     // Free all the memory we reserved
@@ -38,8 +38,8 @@ void less(unsigned char text_in) {
     atexit(less_exit);
     memset(page_table,0, MAX_PAGES);
 
-    ula2 = ZXN_READ_REG(REG_MMU0 + 2);
-    ula3 = ZXN_READ_REG(REG_MMU0 + 3);
+    L3ULABottom = ZXN_READ_REG(REG_MMU0 + 2);
+    L3ULATop = ZXN_READ_REG(REG_MMU0 + 3);
 
     total_8k_pages = i = 1 + (finfo.size/8192);
     printf("8K pages required: %d [", total_8k_pages);
@@ -63,7 +63,7 @@ void less(unsigned char text_in) {
         else {
             esx_f_read(text_in, 0x4000, finfo.size % 8192);
         }
-        ZXN_WRITE_MMU2(ula2);
+        ZXN_WRITE_MMU2(L3ULABottom);
 
         --i;
     }

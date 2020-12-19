@@ -93,9 +93,37 @@ void less(unsigned char text_in) {
     l3_init();
 
     display_textview_init();
-    display_textview_draw();
+    uint8_t c = 0;
+    while(1) {
+        // display page
+        display_textview_draw();
 
-    in_wait_nokey();
-    in_wait_key();
+        // get input
+        in_wait_nokey();
+        in_wait_key();
+        c = in_inkey();
+
+        // find result
+        switch(c) {
+            case 8:
+                textview_memory_scroll_left();
+                break;
+            case 9:
+                textview_memory_scroll_right();
+                break;
+            case 10:
+                textview_memory_scroll_down();
+                break;
+            case 11:
+                textview_memory_scroll_up();
+                break;
+            case 'q':
+                goto exit;
+        }
+        printAt(1,1);
+        printf("KEY: %d", c);
+
+    }
+    exit:
     less_exit();
 }

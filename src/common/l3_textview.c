@@ -62,41 +62,42 @@ void display_textview_init() {
 }
 
 void textview_memory_scroll_up() {
-//    if (textview_lines[0] < 1000 && page_table_index) {
-//        --page_table_index;
-//        for (uint8_t i = 0; i < 32; i++) {
-//            if (textview_lines[i]) textview_lines[i] = textview_lines[i] + 8192;
-//        }
-//        zx_border(page_table_index);
-//    }
-//    if (!textview_lines[0]) return;
-//
-//    for (next_line = 31; next_line != 0;) {
-//        textview_lines[next_line--] = textview_lines[next_line];
-//    }
-//
-//
-//    next_char = textview_lines[0] - 2;
-//
-//    /* PAGE OUT GRAPHICS BANKS! */
-//    textview_memory_data();
-//    /****************************/
-//    while (next_char) {
-//        if (ula_bank[next_char] == 10) {
-//            textview_lines[0] = ++next_char;
-//            goto found;
-//        } else {
-//            --next_char;
-//        }
-//
-//        if (next_line != 0) break;
-//    }
-//    textview_lines[0] = 0;
-//
-//    found:
-//    /* PAGE *IN* GRAPHICS BANKS */
-//    textview_memory_display();
-//    /****************************/
+    if (textview_lines[0] < 1000 && page_table_index) {
+        --page_table_index;
+        for (uint8_t i = 0; i < 32; i++) {
+            if (textview_lines[i]) textview_lines[i] = textview_lines[i] + 8192;
+        }
+        zx_border(page_table_index);
+    }
+    if (!textview_lines[0]) return;
+
+    for (next_line = 31; next_line != 0;) {
+        uint8_t old_line = next_line--;
+        textview_lines[old_line] = textview_lines[next_line];
+    }
+
+
+    next_char = textview_lines[0] - 2;
+
+    /* PAGE OUT GRAPHICS BANKS! */
+    textview_memory_data();
+    /****************************/
+    while (next_char) {
+        if (ula_bank[next_char] == 10) {
+            textview_lines[0] = ++next_char;
+            goto found;
+        } else {
+            --next_char;
+        }
+
+        if (next_line != 0) break;
+    }
+    textview_lines[0] = 0;
+
+    found:
+    /* PAGE *IN* GRAPHICS BANKS */
+    textview_memory_display();
+    /****************************/
 }
 
 void textview_memory_scroll_down() {

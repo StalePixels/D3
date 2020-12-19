@@ -10,8 +10,8 @@ uint16_t L3ScreenColour = TEXTMODE_DEFAULT_COLOUR;
 uint8_t L3CursorFlashRate = LIBLAYER3_CURSOR_FLASH_RATE;
 uint8_t L3RepeatStart = LIBLAYER3_REPEAT_START;
 uint8_t L3RepeatKey = LIBLAYER3_REPEAT_KEY;
-
-uint8_t *L3PalleteStore[];
+struct __tilemap L3tilemap[32][80];
+struct __tiles L3tiles[256];
 
 uint8_t L3ULATop, L3ULABottom;
 

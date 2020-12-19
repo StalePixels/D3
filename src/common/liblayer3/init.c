@@ -160,16 +160,10 @@ uint8_t l3_palette[512] = {
 
 void l3_init() {
     // We're going to trash this area for the Editor canvas, so let's back it up so we can restore it
-    L3ULABottom = esx_ide_bank_alloc(0);
-    ZXN_WRITE_MMU3(L3ULABottom);
-    memcpy(0x6000, 0x4000, 8192);
-    ZXN_WRITE_MMU3(11);
-    L3ULATop = esx_ide_bank_alloc(0);
-    ZXN_WRITE_MMU2(L3ULATop);
-    memcpy(0x4000, 0x6000, 8192);
-    ZXN_WRITE_MMU2(10);
-
-    dzx7_standard(font, ((unsigned char *)0x5D00));
+    memcpy(L3tilemap, tilemap, sizeof(L3tilemap));
+    memcpy(L3tiles, tiles, sizeof(L3tiles));
+//
+    dzx7_standard(L3font, ((unsigned char *)0x5D00));
 
     // 0x6E (110) R/W =>  Tilemap Base Address
     //  bits 7-6 = Read back as zero, write values ignored
@@ -199,8 +193,10 @@ void l3_init() {
     l3_clear();
 
     ZXN_NEXTREG(0x6b, /*0b11001000*/ 0xC8);                     // enable tilemap, 80x32 mode,
-    // 1bit palette "textmode"
-    // Setup the ULA for overlay UI
-    zx_cls(INK_MAGENTA|PAPER_MAGENTA|BRIGHT);
+
+
+//     1bit palette "textmode"
+//     Setup the ULA for overlay UI
+//    zx_cls(INK_MAGENTA|PAPER_MAGENTA|BRIGHT);
     zx_border(INK_WHITE);
 }

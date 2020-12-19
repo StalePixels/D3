@@ -16,7 +16,7 @@
 
 static unsigned char old_cpu_speed;
 
-static void at_exit() {
+void at_exit() {
     // Restore CPU Speed
     ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
     intrinsic_ei();

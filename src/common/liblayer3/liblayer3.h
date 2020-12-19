@@ -41,15 +41,18 @@ struct __tilemap
 };
 
 extern struct __tilemap tilemap[32][80];
+extern struct __tilemap L3tilemap[32][80];
 
 struct __tiles
 {
     unsigned char bmp[8];           // each tile image is 8 bytes (64px@1bpp)
 };
 
-extern const uint8_t 	font[];
+extern const uint8_t 	L3font[];
+extern unsigned char ula_bank[];
 
 extern struct __tiles tiles[256];   //
+extern struct __tiles L3tiles[256];   //
 
 extern uint8_t L3ScreenX, L3ScreenY;
 extern uint16_t L3ScreenColour;

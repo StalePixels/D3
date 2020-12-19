@@ -6,4 +6,5 @@
 #define D3_STARTUP_H
 
 void startup();
+void at_exit();
 #endif //D3_STARTUP_H

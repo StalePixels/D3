@@ -35,9 +35,9 @@ LS := ls -l@k
 VERSION := `cat VERSION`
 DATE := `which date`
 
-default: q_inkey
+default: q_less
 
-all: ini every untar ch8show
+all: ini every untar ch8show inkey less
 
 clean:
 	$(RM) $(BUILD_DIR)
@@ -166,6 +166,7 @@ q_ch8show: ch8show install_ch8show
 uninstall_ch8show:
 	$(RM) $(INSTALL_BASE)/dot/CH8SHOW
 
+
 #
 # INKEY
 #
@@ -181,20 +182,31 @@ q_inkey: inkey install_inkey
 
 uninstall_inkey:
 	$(RM) $(INSTALL_BASE)/dot/INKEY
+
+
 #
 # LESS
 #
-less:
+
+less_l3: dirs
+	$(CC) $(CCFLAGS) $(INCFLAGS) $(BUILDFLAGS) -c \
+		--codesegBANK_41 --constsegBANK_41 \
+		--datasegBANK_41 --bsssegBANK_41 \
+		@src/common/LAYER3.lst -o./LESS_LAYER3.o
+
+less_banks: dirs less_l3
+
+less_assemble: dirs less_banks less_l3
 	$(CC) $(CCFLAGS) $(LDFLAGS) @src/less.lst -oLESS -create-app \
 		-subtype=dotn $(CZFLAGS)
 	$(MV) LESS $(BUILD_DIR)/LESS.DOT
 
-install_less:
+less: deps dirs less_banks less_assemble
+
+install_less: less_banks less_assemble
 	$(CP) $(BUILD_DIR)/LESS.DOT $(INSTALL_BASE)/dot/LESS
 
-q_less: less install_less
+q_less: dirs less_banks less_assemble install_less
 
 uninstall_less:
 	$(RM) $(INSTALL_BASE)/dot/LESS
-
-

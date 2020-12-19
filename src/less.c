@@ -1,3 +1,6 @@
+// I'm a banker, move my stack down...
+#pragma output REGISTER_SP = 0xBFE0
+
 #include <z80.h>
 #include <arch/zxn.h>
 #include <intrinsic.h>
@@ -13,8 +16,6 @@
 #include "common/startup.h"
 #include "less/less.h"
 
-// One for me, and one for my wife (aka common/startup.c)
-#pragma output CLIB_EXIT_STACK_SIZE = 2
 
 const char *help_text[] = {
         "\nLESS",

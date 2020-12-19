@@ -16,6 +16,7 @@
 #include "common/d3.h"
 #include "common/startup.h"
 #include "ini/ini_common.h"
+#pragma define CLIB_EXIT_STACK_SIZE = 1
 
 unsigned char file_in, file_out;
 uint16_t counter = 0;

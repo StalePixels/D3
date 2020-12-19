@@ -11,6 +11,6 @@
 
 void l3_clear(void)
 {
-    memset(tilemap, 0, sizeof(tilemap));
+    memset(tilemap, 32, sizeof(tilemap));
 	L3ScreenX = L3ScreenY = 0;
 }

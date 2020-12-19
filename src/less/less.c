@@ -120,8 +120,6 @@ void less(unsigned char text_in) {
             case 'q':
                 goto exit;
         }
-        printAt(1,1);
-        printf("KEY: %d", c);
 
     }
     exit:

@@ -18,10 +18,14 @@ static uint16_t textview_lines[32] = {
         0, 0, 0, 0, 0, 0, 0, 0
 };
 
- unsigned char row[81] = "";
- uint8_t i, j, next_line;
- uint16_t next_char;
- uint16_t left_inset;
+
+static uint8_t TEXTVIEW_MAX_ROWS = 31;
+static uint8_t TEXTVIEW_MAX_COLS = 80;
+
+unsigned char row[81] = "";
+uint8_t i, j, next_line;
+uint16_t next_char;
+uint16_t left_inset;
 
 void textview_memory_data() {
     ZXN_WRITE_MMU2(page_table[page_table_index]);
@@ -33,18 +37,15 @@ void textview_memory_display() {
     ZXN_WRITE_MMU3(11);
 }
 
-void display_textview_init() {
+void display_textview_init(char *title) {
     next_line = 0;
     next_char = 0;
     left_inset = 0;
-    row[80]=0;
-
-    printAt(0, 0);
+    row[TEXTVIEW_MAX_COLS]=0;
 
     /* PAGE OUT GRAPHICS BANKS! */
     textview_memory_data();
     /****************************/
-
     textview_lines[next_line] = next_char;
     while(ula_bank[next_char]) {
         if(ula_bank[next_char]==10) {
@@ -53,12 +54,25 @@ void display_textview_init() {
             ++next_char;
         }
 
-        if(next_line>31) break;
+        if(next_line == TEXTVIEW_MAX_ROWS - 1) goto statusbar;
 
     }
+    statusbar:
     /* PAGE *IN* GRAPHICS BANKS */
     textview_memory_display();
     /****************************/
+    L3ScreenColour = 2;
+    l3_goto(0, TEXTVIEW_MAX_ROWS);
+    sprintf(row, " %-66s ", title);
+    l3_puts(row);
+    do {
+        L3ScreenColour= L3ScreenColour + 2;
+        l3_putc(30);
+        l3_putc(31);
+    } while(L3ScreenColour<12);
+    L3ScreenColour = 2;
+    l3_puts("  ");
+    L3ScreenColour = 0;
 }
 
 void textview_memory_scroll_up() {
@@ -71,7 +85,7 @@ void textview_memory_scroll_up() {
     }
     if (!textview_lines[0]) return;
 
-    for (next_line = 31; next_line != 0;) {
+    for (next_line = TEXTVIEW_MAX_ROWS - 1; next_line != 0;) {
         uint8_t old_line = next_line--;
         textview_lines[old_line] = textview_lines[next_line];
     }
@@ -101,7 +115,7 @@ void textview_memory_scroll_up() {
 }
 
 void textview_memory_scroll_down() {
-    for (next_line = 0; next_line < 31;) {
+    for (next_line = 0; next_line < TEXTVIEW_MAX_ROWS - 1;) {
         uint8_t old_line = next_line++;
         textview_lines[old_line] = textview_lines[next_line];
     }
@@ -113,7 +127,7 @@ void textview_memory_scroll_down() {
     /****************************/
     while (ula_bank[next_char]) {
         if (ula_bank[next_char] == 10) {
-            textview_lines[31] = ++next_char;
+            textview_lines[TEXTVIEW_MAX_ROWS - 1] = ++next_char;
             goto found;
         } else {
             ++next_char;
@@ -126,7 +140,7 @@ void textview_memory_scroll_down() {
 
     if (textview_lines[0] > 8192) {
         ++page_table_index;
-        for (uint8_t i = 0; i < 32; i++) {
+        for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
             if (textview_lines[i]) textview_lines[i] = textview_lines[i] - 8192;
         }
         zx_border(page_table_index);
@@ -144,20 +158,21 @@ void textview_memory_scroll_left() {
         --left_inset;
     }
 }
+
 void display_textview_draw() {
     overflow_right = false;
-    for(i=0;i<32;i++) {
+    for(i=0;i<TEXTVIEW_MAX_ROWS;i++) {
         /* PAGE OUT GRAPHICS BANKS! */
         textview_memory_data();
         /****************************/
-        if(/*i<31 &&*/ (&ula_bank[textview_lines[i] + left_inset] < &ula_bank[textview_lines[i+1]])) {
-            memcpy(row, &ula_bank[textview_lines[i] + left_inset], 80);
+        if((&ula_bank[textview_lines[i] + left_inset] < &ula_bank[textview_lines[i+1]])) {
+            memcpy(row, &ula_bank[textview_lines[i] + left_inset], TEXTVIEW_MAX_COLS);
             goto clip_textview_row;
         }
         else
-        if(i==31) {
-            for(j=0;j<80;j++) {
-                row[j]= ula_bank[textview_lines[31] + left_inset + j];
+        if(i==TEXTVIEW_MAX_ROWS - 1) {
+            for(j=0;j<TEXTVIEW_MAX_COLS;j++) {
+                row[j]= ula_bank[textview_lines[TEXTVIEW_MAX_ROWS - 1] + left_inset + j];
                 if(row[j]==0) {
                     goto print_textview_row;
                 }
@@ -170,15 +185,15 @@ void display_textview_draw() {
         goto print_textview_row;
 
         clip_textview_row:
-        for(j=0;j<80;j++) {
+        for(j=0;j<TEXTVIEW_MAX_COLS;j++) {
             if(row[j]==10) {
                 row[j]=0;
                 goto print_textview_row;
             }
         }
         overflow_right = true;
-        row[79]=175;
-        row[80]=0;
+        row[TEXTVIEW_MAX_COLS-1]=175;
+        row[TEXTVIEW_MAX_COLS]=0;
 
         print_textview_row:
         /* PAGE *IN* GRAPHICS BANKS */
@@ -187,6 +202,7 @@ void display_textview_draw() {
 
         l3_goto(0,i);
         l3_puts(row);
-        l3_clear_to_eol();
+        if(L3ScreenY==i) l3_clear_to_eol();
     }
+
 }

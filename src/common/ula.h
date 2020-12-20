@@ -5,6 +5,13 @@
 #ifndef D3_ULA_H
 #define D3_ULA_H
 
+
+#define _SYSVAR_ATTR_P          (*(int8_t *)(0x5C8D))
+#define _SYSVAR_ATTR_P_INK      (_SYSVAR_ATTR_P & 7)
+#define _SYSVAR_ATTR_P_PAPER    (_SYSVAR_ATTR_P >> 3 & 7)
+#define _SYSVAR_ATTR_P_BRIGHT   ((_SYSVAR_ATTR_P >> 6) & 1)
+#define _SYSVAR_ATTR_P_FLASH    ((_SYSVAR_ATTR_P >> 7) & 1)
+
 ///////////////////////////////
 // ULA Text Macros
 ///////////////////////////////

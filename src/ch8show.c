@@ -63,6 +63,5 @@ int main(int argc, char **argv)
 
     esxdos_f_close(font_in);
 
-
     exit(0);
 }

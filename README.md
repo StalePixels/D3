@@ -6,15 +6,15 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .INI - Command-line INI editor for simple, programmable edits to INI or INI style config files.
 
-.EVERY - Job scheduler.  Will set NextRex 0x7F if the schedule is due.
+.EVERY - Job scheduler.  Manages named jobs and will set NextRex 0x7F if the schedule is due.
 
-.UNTAR - POSIX compliant ESXDOS version of UNTAR.
+.UNTAR - POSIX compliant ESXDOS version of UNTAR, super easy to embed in other apps.
 
-.CH8SHOW - View 768b/1k 1bit font files in ROM/UDG format
+.CH8SHOW - View 768b/1k 1bit font files in ROM/UDG format inspired by Damien Guard's zx-origins project.
 
-.INKEY - View keycodes as returned for keys & combos from z88dk
+.INKEY - View keycodes as returned for keys & combos from z88dk built for lazy developers who need a handy guide.
 
-.LESS - Less is more. A textfile pager with extra features
+.LESS - Less is more. A plain text pager with extra features, a compliment, not replacement, for MORE  - thanks Marco.
 
 Notable Changes
 -

@@ -4,6 +4,9 @@ Changelog
 v0.5.0
 -
  - NEW: .LESS added
+ - FIX: Use _SYSFAR_ATTR_P for the default colours 
+    ( Idea Credit Kris Borowinski )
+   
  
 v0.4.2
 -

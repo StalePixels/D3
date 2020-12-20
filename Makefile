@@ -96,6 +96,8 @@ release: ini every untar ch8show inkey less
 	$(CP) $(BUILD_DIR)/INKEY.DOT $(RELEASE_DIR)/INKEY
 	$(CP) $(BUILD_DIR)/LESS.DOT $(RELEASE_DIR)/LESS
 
+install: install_every install_ini install_untar install_ch8show install_inkey install_less
+
 uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_inkey uninstall_less
 
 
@@ -203,7 +205,7 @@ less_assemble: dirs less_banks less_l3
 
 less: deps dirs less_banks less_assemble
 
-install_less: less_banks less_assemble
+install_less:
 	$(CP) $(BUILD_DIR)/LESS.DOT $(INSTALL_BASE)/dot/LESS
 
 q_less: dirs less_banks less_assemble install_less

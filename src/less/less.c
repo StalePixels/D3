@@ -46,7 +46,7 @@ void less_exit() {
     ZXN_WRITE_MMU7(ula7);
 }
 
-void less(unsigned char text_in) {
+void less(char *title, unsigned char text_in) {
     struct esxdos_stat finfo;  // = {0,0,0,0,0};
     esxdos_f_fstat(text_in, &finfo);
     atexit(less_exit);
@@ -92,14 +92,14 @@ void less(unsigned char text_in) {
     ZXN_WRITE_MMU7(_z_page_table[83]);
     l3_init();
 
-    display_textview_init();
+    display_textview_init(title);
     uint8_t c = 0;
     while(1) {
         // display page
         display_textview_draw();
 
         // get input
-        in_wait_nokey();
+//        in_wait_nokey();
         in_wait_key();
         c = in_inkey();
 
@@ -120,7 +120,6 @@ void less(unsigned char text_in) {
             case 'q':
                 goto exit;
         }
-
     }
     exit:
     less_exit();

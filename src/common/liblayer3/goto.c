@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "liblayer3.h"
 
-void l3_goto(uint16_t x, uint16_t y)
+void l3_goto(uint8_t x, uint8_t y)
 {
 	L3ScreenX = x;
 	L3ScreenY = y;

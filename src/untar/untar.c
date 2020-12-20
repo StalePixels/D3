@@ -57,6 +57,7 @@ void untar(unsigned char tar_in, const char *path)
     printf("Extracting from %s\n", path);
 
     for (;;) {
+        // Prevent scroll messages
         z80_bpoke(23692, 255);
         bytes_read = esxdos_f_read(tar_in, buff, 512);
         if (bytes_read < 512) {

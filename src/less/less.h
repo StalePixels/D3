@@ -10,5 +10,5 @@
 extern unsigned char err_no_memory[];
 
 void less_exit();
-void less(unsigned char text_in);
+void less(char *title, unsigned char text_in);
 #endif //D3_LESS_H

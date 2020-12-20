@@ -15,7 +15,7 @@ void l3_putc(uint16_t c)
     if (L3ScreenY >= LIBLAYER3_SCREENHEIGHT)
             return;
 
-    if (c < 32)
+    if (c < L3_LOWEST_SAFE_CHARPOINT)
     {
             l3_putc('^');
             c += '@';

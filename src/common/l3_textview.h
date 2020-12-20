@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-void display_textview_init();
+void display_textview_init(char *title);
 void display_textview_draw();
 void textview_memory_scroll_up();
 void textview_memory_scroll_down();

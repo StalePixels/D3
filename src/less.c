@@ -47,7 +47,7 @@ int main(int argc, char **argv)
         exit(errno);
     }
 
-    less(text_in);
+    less(argv[1], text_in);
 
     esxdos_f_close(text_in);
 

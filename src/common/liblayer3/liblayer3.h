@@ -66,8 +66,10 @@ extern uint8_t *L3PalleteStore[];
 #define LIBLAYER3_REPEAT_KEY 15
 #define LIBLAYER3_CURSOR_FLASH_RATE 10
 
+#define L3_LOWEST_SAFE_CHARPOINT        30
 
-extern void l3_goto(uint16_t x, uint16_t y);
+
+extern void l3_goto(uint8_t x, uint8_t y);
 extern void l3_clear(void);
 extern void l3_putc(uint16_t c);
 extern void l3_puts(const char* s);
@@ -78,7 +80,6 @@ extern void l3_revon(void);
 extern void l3_revoff(void);
 extern void l3_init();
 extern void l3_exit();
-void l3_palette_restore(uint8_t PaletteType, uint8_t *MemorySource);
 
 #define LIBLAYER3_SCREENWIDTH 80
 #define LIBLAYER3_SCREENHEIGHT 32

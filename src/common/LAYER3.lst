@@ -9,7 +9,6 @@ liblayer3/exit.c
 liblayer3/puts.c
 liblayer3/revoff.c
 liblayer3/revon.c
-liblayer3/palette.c
 liblayer3/liblayer3.c
 liblayer3/liblayer3.asm
 l3_textview.c

@@ -12,10 +12,18 @@
 #include "liblayer3/liblayer3.h"
 
 static uint16_t textview_lines[32] = {
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+        0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
+//        0, 0, 0, 0, 0, 0, 0, 0,
+//        0, 0, 0, 0, 0, 0, 0, 0,
+//        0, 0, 0, 0, 0, 0, 0, 0,
+//        0, 0, 0, 0, 0, 0, 0, 0
 };
 
 
@@ -26,44 +34,24 @@ unsigned char row[81] = "";
 uint8_t i, j, next_line;
 uint16_t next_char;
 uint16_t left_inset;
+char *text_title;
+uint32_t text_size;
+uint32_t text_seen;
 
-void textview_memory_data() {
+void l3_textview_memory_data() {
     ZXN_WRITE_MMU2(page_table[page_table_index]);
     ZXN_WRITE_MMU3(page_table[page_table_index + 1]);
 }
 
-void textview_memory_display() {
+void l3_textview_memory_display() {
     ZXN_WRITE_MMU2(10);
     ZXN_WRITE_MMU3(11);
 }
 
-void display_textview_init(char *title) {
-    next_line = 0;
-    next_char = 0;
-    left_inset = 0;
-    row[TEXTVIEW_MAX_COLS]=0;
-
-    /* PAGE OUT GRAPHICS BANKS! */
-    textview_memory_data();
-    /****************************/
-    textview_lines[next_line] = next_char;
-    while(ula_bank[next_char]) {
-        if(ula_bank[next_char]==10) {
-            textview_lines[++next_line] = ++next_char;
-        } else {
-            ++next_char;
-        }
-
-        if(next_line == TEXTVIEW_MAX_ROWS - 1) goto statusbar;
-
-    }
-    statusbar:
-    /* PAGE *IN* GRAPHICS BANKS */
-    textview_memory_display();
-    /****************************/
+void l3_textview_draw_status() {
     L3ScreenColour = 2;
     l3_goto(0, TEXTVIEW_MAX_ROWS);
-    sprintf(row, " %-66s ", title);
+    sprintf(row, " %-44s %8lu/%8lubytes ", text_title, text_seen, text_size);
     l3_puts(row);
     do {
         L3ScreenColour= L3ScreenColour + 2;
@@ -75,7 +63,35 @@ void display_textview_init(char *title) {
     L3ScreenColour = 0;
 }
 
-void textview_memory_scroll_up() {
+void l3_textview_init(char *title, uint32_t size) {
+    next_line = 0;
+    next_char = 0;
+    text_seen = 0;
+    left_inset = 0;
+    row[TEXTVIEW_MAX_COLS]=0;
+
+    /* PAGE OUT GRAPHICS BANKS! */
+    l3_textview_memory_data();
+    /****************************/
+    textview_lines[next_line] = next_char;
+    while(ula_bank[next_char] && next_char<size) {
+        if(ula_bank[next_char]==10) {
+            textview_lines[++next_line] = ++next_char;
+        } else {
+            ++next_char;
+        }
+
+        if(next_line == TEXTVIEW_MAX_ROWS - 1) goto done;
+    }
+    done:
+    /* PAGE *IN* GRAPHICS BANKS */
+    l3_textview_memory_display();
+    /****************************/
+    text_size = size;
+    text_title = title;
+}
+
+void l3_textview_memory_scroll_up() {
     if (textview_lines[0] < 1000 && page_table_index) {
         --page_table_index;
         for (uint8_t i = 0; i < 32; i++) {
@@ -90,11 +106,10 @@ void textview_memory_scroll_up() {
         textview_lines[old_line] = textview_lines[next_line];
     }
 
-
     next_char = textview_lines[0] - 2;
 
     /* PAGE OUT GRAPHICS BANKS! */
-    textview_memory_data();
+    l3_textview_memory_data();
     /****************************/
     while (next_char) {
         if (ula_bank[next_char] == 10) {
@@ -109,12 +124,17 @@ void textview_memory_scroll_up() {
     textview_lines[0] = 0;
 
     found:
+    // rewind the display counter
+    text_seen = text_seen - (textview_lines[1] - textview_lines[0]);
+
     /* PAGE *IN* GRAPHICS BANKS */
-    textview_memory_display();
+    l3_textview_memory_display();
     /****************************/
+    l3_textview_draw();
 }
 
-void textview_memory_scroll_down() {
+void l3_textview_memory_scroll_down() {
+    text_seen = text_seen + (textview_lines[1] - textview_lines[0]);
     for (next_line = 0; next_line < TEXTVIEW_MAX_ROWS - 1;) {
         uint8_t old_line = next_line++;
         textview_lines[old_line] = textview_lines[next_line];
@@ -123,7 +143,7 @@ void textview_memory_scroll_down() {
     next_char = textview_lines[next_line];
 
     /* PAGE OUT GRAPHICS BANKS! */
-    textview_memory_data();
+    l3_textview_memory_data();
     /****************************/
     while (ula_bank[next_char]) {
         if (ula_bank[next_char] == 10) {
@@ -135,7 +155,7 @@ void textview_memory_scroll_down() {
     }
     found:
     /* PAGE *IN* GRAPHICS BANKS */
-    textview_memory_display();
+    l3_textview_memory_display();
     /****************************/
 
     if (textview_lines[0] > 8192) {
@@ -145,40 +165,51 @@ void textview_memory_scroll_down() {
         }
         zx_border(page_table_index);
     }
+    l3_textview_draw();
 }
 
 static bool overflow_right = false;
-void textview_memory_scroll_right() {
+void l3_textview_memory_scroll_right() {
     if(overflow_right) {
         ++left_inset;
     }
+    l3_textview_draw_window();
 }
-void textview_memory_scroll_left() {
+void l3_textview_memory_scroll_left() {
     if(left_inset) {
         --left_inset;
     }
+    l3_textview_draw_window();
 }
 
-void display_textview_draw() {
+void l3_textview_draw_window() {
     overflow_right = false;
     for(i=0;i<TEXTVIEW_MAX_ROWS;i++) {
+        L3ScreenColour = 0;
+
+        if(textview_lines[i] == 0xFFFF) goto blank_row;
+
         /* PAGE OUT GRAPHICS BANKS! */
-        textview_memory_data();
+        l3_textview_memory_data();
         /****************************/
-        if((&ula_bank[textview_lines[i] + left_inset] < &ula_bank[textview_lines[i+1]])) {
+        if(i<TEXTVIEW_MAX_ROWS-1 && &ula_bank[textview_lines[i] + left_inset] < &ula_bank[textview_lines[i+1]]) {
             memcpy(row, &ula_bank[textview_lines[i] + left_inset], TEXTVIEW_MAX_COLS);
             goto clip_textview_row;
         }
         else
         if(i==TEXTVIEW_MAX_ROWS - 1) {
+            L3ScreenColour = 4;
+
+            memcpy(row, &ula_bank[textview_lines[i] + left_inset], TEXTVIEW_MAX_COLS);
             for(j=0;j<TEXTVIEW_MAX_COLS;j++) {
-                row[j]= ula_bank[textview_lines[TEXTVIEW_MAX_ROWS - 1] + left_inset + j];
+                row[j]= ula_bank[textview_lines[i] + left_inset + j];
                 if(row[j]==0) {
                     goto print_textview_row;
                 }
             }
             goto clip_textview_row;
         }
+        blank_row:
         // This is basically a blank row (outside of viewport)
         row[0] = 0;
 
@@ -197,7 +228,7 @@ void display_textview_draw() {
 
         print_textview_row:
         /* PAGE *IN* GRAPHICS BANKS */
-        textview_memory_display();
+        l3_textview_memory_display();
         /****************************/
 
         l3_goto(0,i);
@@ -205,4 +236,9 @@ void display_textview_draw() {
         if(L3ScreenY==i) l3_clear_to_eol();
     }
 
+}
+
+void l3_textview_draw() {
+    l3_textview_draw_window();
+    l3_textview_draw_status();
 }

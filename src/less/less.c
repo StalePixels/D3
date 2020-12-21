@@ -74,6 +74,7 @@ void less(char *title, unsigned char text_in) {
         printf(".");
 
         ZXN_WRITE_MMU2(page_table[i]);
+        memset(0x4000, 0, 8192);
         if(i!=total_8k_pages-1) {
             esx_f_read(text_in, 0x4000, 8192);
         }
@@ -92,11 +93,12 @@ void less(char *title, unsigned char text_in) {
     ZXN_WRITE_MMU7(_z_page_table[83]);
     l3_init();
 
-    display_textview_init(title);
+    // Setup the viewer
+    l3_textview_init(title, finfo.size);
+    // display page
+    l3_textview_draw();
     uint8_t c = 0;
     while(1) {
-        // display page
-        display_textview_draw();
 
         // get input
 //        in_wait_nokey();
@@ -106,16 +108,16 @@ void less(char *title, unsigned char text_in) {
         // find result
         switch(c) {
             case 8:
-                textview_memory_scroll_left();
+                l3_textview_memory_scroll_left();
                 break;
             case 9:
-                textview_memory_scroll_right();
+                l3_textview_memory_scroll_right();
                 break;
             case 10:
-                textview_memory_scroll_down();
+                l3_textview_memory_scroll_down();
                 break;
             case 11:
-                textview_memory_scroll_up();
+                l3_textview_memory_scroll_up();
                 break;
             case 'q':
                 goto exit;

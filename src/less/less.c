@@ -46,7 +46,7 @@ void less_exit() {
     ZXN_WRITE_MMU7(ula7);
 }
 
-void less(char *title, unsigned char text_in) {
+void less(char *title, unsigned char text_in, uint8_t viewer_mode) {
     struct esxdos_stat finfo;  // = {0,0,0,0,0};
     esxdos_f_fstat(text_in, &finfo);
     atexit(less_exit);
@@ -91,8 +91,11 @@ void less(char *title, unsigned char text_in) {
     ZXN_WRITE_MMU7(_z_page_table[83]);
     l3_init();
 
+    // 1 == hex, 0 == text
+    l3_textview_mode = viewer_mode;
     // Setup the viewer
     l3_textview_init(title, finfo.size);
+
     // display page
     l3_textview_draw();
     uint8_t c = 0;

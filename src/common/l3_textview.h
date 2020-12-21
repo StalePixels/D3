@@ -18,5 +18,6 @@ void l3_textview_memory_scroll_left();
 
 extern uint8_t page_table[];
 extern uint8_t page_table_index;
+extern uint8_t l3_textview_mode;
 
 #endif //WIKI_TEXTVIEW_H

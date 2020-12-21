@@ -97,7 +97,6 @@ void l3_textview_memory_scroll_up() {
         for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
             if (textview_lines[i]) textview_lines[i] = textview_lines[i] + 8192;
         }
-        zx_border(page_table_index);
     }
     if (!textview_lines[0]) return;
 

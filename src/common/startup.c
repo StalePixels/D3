@@ -30,4 +30,5 @@ void startup() {
     // Restore to original atexit
     atexit(at_exit);
     errno = 0;
+    intrinsic_di();
 }

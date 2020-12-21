@@ -73,7 +73,8 @@ void less(char *title, unsigned char text_in) {
         // Make it down, move along around, do it all again
         printf(".");
 
-        ZXN_WRITE_MMU2(page_table[i]);
+        ZXN_WRITE_MMU2(page_table[i]);  /*  MAP TEXT BUFFER OVER ULA! DANGERZONE! */
+
         memset(0x4000, 0, 8192);
         if(i!=total_8k_pages-1) {
             esx_f_read(text_in, 0x4000, 8192);
@@ -81,10 +82,7 @@ void less(char *title, unsigned char text_in) {
         else {
             esx_f_read(text_in, 0x4000, finfo.size % 8192);
         }
-        memcpy(row, 0x4000, 80);
-        ZXN_WRITE_MMU2(10);
-        row[80]=0;
-
+        ZXN_WRITE_MMU2(10);              /* RESTORE ULA! DANGERZONE! */
         ++i;
     }
     printf("]");

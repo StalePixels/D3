@@ -30,7 +30,7 @@ static uint16_t textview_lines[32] = {
 static uint8_t TEXTVIEW_MAX_ROWS = 31;
 static uint8_t TEXTVIEW_MAX_COLS = 80;
 
-unsigned char row[81] = "";
+char row[81] = "";
 uint8_t i, j, next_line;
 uint16_t next_char;
 uint16_t left_inset;
@@ -94,7 +94,7 @@ void l3_textview_init(char *title, uint32_t size) {
 void l3_textview_memory_scroll_up() {
     if (textview_lines[0] < 1000 && page_table_index) {
         --page_table_index;
-        for (uint8_t i = 0; i < 32; i++) {
+        for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
             if (textview_lines[i]) textview_lines[i] = textview_lines[i] + 8192;
         }
         zx_border(page_table_index);
@@ -134,13 +134,17 @@ void l3_textview_memory_scroll_up() {
 }
 
 void l3_textview_memory_scroll_down() {
-    text_seen = text_seen + (textview_lines[1] - textview_lines[0]);
-    for (next_line = 0; next_line < TEXTVIEW_MAX_ROWS - 1;) {
-        uint8_t old_line = next_line++;
+    if(textview_lines[TEXTVIEW_MAX_ROWS-1] == 0xFFFF) return;
+
+    uint8_t old_line = 0, next_line = 1;
+
+    text_seen = text_seen + (textview_lines[next_line] - textview_lines[old_line]);
+    for (;next_line < TEXTVIEW_MAX_ROWS;++next_line) {
         textview_lines[old_line] = textview_lines[next_line];
+        old_line = next_line;
     }
 
-    next_char = textview_lines[next_line];
+    next_char = textview_lines[TEXTVIEW_MAX_ROWS - 1];
 
     /* PAGE OUT GRAPHICS BANKS! */
     l3_textview_memory_data();
@@ -153,6 +157,8 @@ void l3_textview_memory_scroll_down() {
             ++next_char;
         }
     }
+    textview_lines[TEXTVIEW_MAX_ROWS - 1] = 0xFFFF;
+
     found:
     /* PAGE *IN* GRAPHICS BANKS */
     l3_textview_memory_display();
@@ -185,7 +191,6 @@ void l3_textview_memory_scroll_left() {
 void l3_textview_draw_window() {
     overflow_right = false;
     for(i=0;i<TEXTVIEW_MAX_ROWS;i++) {
-        L3ScreenColour = 0;
 
         if(textview_lines[i] == 0xFFFF) goto blank_row;
 
@@ -198,16 +203,22 @@ void l3_textview_draw_window() {
         }
         else
         if(i==TEXTVIEW_MAX_ROWS - 1) {
-            L3ScreenColour = 4;
-
-            memcpy(row, &ula_bank[textview_lines[i] + left_inset], TEXTVIEW_MAX_COLS);
-            for(j=0;j<TEXTVIEW_MAX_COLS;j++) {
-                row[j]= ula_bank[textview_lines[i] + left_inset + j];
-                if(row[j]==0) {
-                    goto print_textview_row;
+            // Is this line long enough to print?
+            if(strlen(&ula_bank[textview_lines[i]]) > left_inset
+                && strchr(&ula_bank[textview_lines[i]], 10) > &ula_bank[textview_lines[i]]+left_inset)
+            {
+                for(j=0;j<TEXTVIEW_MAX_COLS;j++) {
+                    row[j] = ula_bank[textview_lines[i] + left_inset + j];
+                    if(row[j]==10) {
+                        row[j] = 0; // Set the string terminator
+                        goto print_textview_row;
+                    } // Found a string terminator
+                    if(row[j]==0) {
+                        goto print_textview_row;
+                    }
                 }
+                goto clip_textview_row;
             }
-            goto clip_textview_row;
         }
         blank_row:
         // This is basically a blank row (outside of viewport)

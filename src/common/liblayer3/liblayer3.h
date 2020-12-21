@@ -49,7 +49,7 @@ struct __tiles
 };
 
 extern const uint8_t 	L3font[];
-extern unsigned char ula_bank[];
+extern char ula_bank[];
 
 extern struct __tiles tiles[256];   //
 extern struct __tiles L3tiles[256];   //

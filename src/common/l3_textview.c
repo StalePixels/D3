@@ -40,6 +40,8 @@ uint32_t text_seen;
 uint32_t text_offset;
 uint8_t l3_textview_mode;
 
+static bool overflow_right = false;
+
 void l3_textview_memory_data() {
     ZXN_WRITE_MMU2(page_table[page_table_index]);
     ZXN_WRITE_MMU3(page_table[page_table_index + 1]);
@@ -122,7 +124,7 @@ void l3_textview_init(char *title, uint32_t size) {
     }
 }
 
-void l3_textview_memory_scroll_up() {
+void l3_textview_memory_scroll_up(uint8_t steps) {
     if (textview_lines[0] < 1000 && page_table_index) {
         --page_table_index;
         for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
@@ -174,39 +176,43 @@ void l3_textview_memory_scroll_up() {
     l3_textview_draw();
 }
 
-void l3_textview_memory_scroll_down() {
-    if(textview_lines[TEXTVIEW_MAX_ROWS-1] == 0xFFFF) return;
+void l3_textview_memory_scroll_down(uint8_t steps) {
+    while(steps--) {
+        if (textview_lines[TEXTVIEW_MAX_ROWS - 1] == 0xFFFF) return;
 
-    uint8_t old_line = 0, next_line = 1;
+        uint8_t old_line = 0, next_line = 1;
 
-    text_seen = text_seen + (textview_lines[next_line] - textview_lines[old_line]);
-    for (;next_line < TEXTVIEW_MAX_ROWS;++next_line) {
-        textview_lines[old_line] = textview_lines[next_line];
-        old_line = next_line;
-    }
-
-
-    if(l3_textview_mode == 0) {
-        // search forwards for text
-        next_char = textview_lines[TEXTVIEW_MAX_ROWS - 1];
-
-        /* PAGE OUT GRAPHICS BANKS! */
-        l3_textview_memory_data();
-        /****************************/
-        while (ula_bank[next_char]) {
-            if (ula_bank[next_char] == 10) {
-                textview_lines[TEXTVIEW_MAX_ROWS - 1] = ++next_char;
-                goto found;
-            } else {
-                ++next_char;
-            }
+        text_seen = text_seen + (textview_lines[next_line] - textview_lines[old_line]);
+        for (; next_line < TEXTVIEW_MAX_ROWS; ++next_line) {
+            textview_lines[old_line] = textview_lines[next_line];
+            old_line = next_line;
         }
-        textview_lines[TEXTVIEW_MAX_ROWS - 1] = 0xFFFF;
 
-        found:
-        /* PAGE *IN* GRAPHICS BANKS */
-        l3_textview_memory_display();
-        /****************************/
+        if (l3_textview_mode == 0) {
+            // search forwards for text
+            next_char = textview_lines[TEXTVIEW_MAX_ROWS - 1];
+
+            /* PAGE OUT GRAPHICS BANKS! */
+            l3_textview_memory_data();
+            /****************************/
+            while (ula_bank[next_char]) {
+                if (ula_bank[next_char] == 10) {
+                    textview_lines[TEXTVIEW_MAX_ROWS - 1] = ++next_char;
+                    goto found;
+                } else {
+                    ++next_char;
+                }
+            }
+            textview_lines[TEXTVIEW_MAX_ROWS - 1] = 0xFFFF;
+
+            found:
+            /* PAGE *IN* GRAPHICS BANKS */
+            l3_textview_memory_display();
+            /****************************/
+        } else {
+            // skip forwards 16 bytes
+            textview_lines[TEXTVIEW_MAX_ROWS - 1] = textview_lines[TEXTVIEW_MAX_ROWS - 1] + 16;
+        }
 
         if (textview_lines[0] > 8192) {
             ++page_table_index;
@@ -219,15 +225,10 @@ void l3_textview_memory_scroll_down() {
             zx_border(page_table_index);
         }
     }
-    else {
-        // skip forwards 16 bytes
-        textview_lines[TEXTVIEW_MAX_ROWS-1] = textview_lines[TEXTVIEW_MAX_ROWS-1] + 16;
-    }
     l3_textview_draw();
 }
 
-static bool overflow_right = false;
-void l3_textview_memory_scroll_right() {
+void l3_textview_memory_scroll_right(uint8_t steps) {
     if(l3_textview_mode == 0) {
         if (overflow_right) {
             ++left_inset;
@@ -238,7 +239,8 @@ void l3_textview_memory_scroll_right() {
     }
     l3_textview_draw_window();
 }
-void l3_textview_memory_scroll_left() {
+
+void l3_textview_memory_scroll_left(uint8_t steps) {
     if(left_inset) {
         --left_inset;
     }
@@ -313,9 +315,8 @@ void l3_textview_draw_window() {
             l3_textview_memory_data();
             /****************************/
             memcpy(hex_row, &ula_bank[textview_lines[i]], 16);
-
-            sprintf(row, " %04x%04x \xB3%02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x\xB3",
-                    (uint32_t )(text_offset + textview_lines[i]),
+            sprintf(row, " %08lx \xB3%02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x\xB3",
+                    text_seen + (i*16),
                     hex_row[0], hex_row[1], hex_row[2], hex_row[3], hex_row[4], hex_row[5], hex_row[6], hex_row[7],
                     hex_row[8], hex_row[9], hex_row[10],hex_row[11],hex_row[12],hex_row[13],hex_row[14],hex_row[15]
                 );

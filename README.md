@@ -14,7 +14,7 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .INKEY - View keycodes as returned for keys & combos from z88dk built for lazy developers who need a handy guide.
 
-.LESS - Less is more. A plain text pager with extra features, a compliment, not replacement, for MORE  - thanks Marco.
+.LESS - Less is not more. A plain text pager with extra features, a compliment, not replacement, for MORE  - thanks Marco.
 
 Notable Changes
 -

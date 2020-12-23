@@ -27,7 +27,7 @@ const char *help_text[] = {
         "\n Usage examples",
         "\nShow a text file",
         " .LESS /path/to/file.txt",
-        "\nShow a binary file",
+        "Show a binary file",
         " .LESS -x /path/to/file.bin",
         "\nDetails at http://zxn.gg/less",
 };

@@ -36,8 +36,8 @@ uint16_t next_char;
 uint16_t left_inset;
 char *text_title;
 uint32_t text_size;
-uint32_t text_seen;
-uint32_t text_offset;
+uint32_t text_view_start;
+uint32_t text_base_offset;
 uint8_t l3_textview_mode;
 
 static bool overflow_right = false;
@@ -55,7 +55,7 @@ void l3_textview_memory_display() {
 void l3_textview_draw_status() {
     L3ScreenColour = 2;
     l3_goto(0, TEXTVIEW_MAX_ROWS);
-    sprintf(row, " %-44s %8lu/%8lubytes ", text_title, text_seen, text_size);
+    sprintf(row, " %-44s %8lu/%8lubytes ", text_title, text_view_start, text_size);
     l3_puts(row);
     do {
         L3ScreenColour= L3ScreenColour + 2;
@@ -70,11 +70,11 @@ void l3_textview_draw_status() {
 void l3_textview_init(char *title, uint32_t size) {
     text_size = size;
     text_title = title;
-    text_offset = 0;
+    text_base_offset = 0;
 
     next_line = 0;
     next_char = 0;
-    text_seen = 0;
+    text_view_start = 0;
     left_inset = 0;
     row[TEXTVIEW_MAX_COLS]=0;
     textview_lines[next_line] = next_char;
@@ -118,6 +118,7 @@ void l3_textview_init(char *title, uint32_t size) {
 //                    "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD"
                     "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCB"
                     "Word 1\xF62\xCD\xCDWord 2\xF62\xBB");
+
         L3ScreenColour = 2;
         l3_putc(186);
         L3ScreenColour = 0;
@@ -127,20 +128,17 @@ void l3_textview_init(char *title, uint32_t size) {
 void l3_textview_page_up() {
     --page_table_index;
     for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
-        if (textview_lines[i]) {
-            textview_lines[i] = textview_lines[i] + 8192;
-            text_offset = text_offset + 8192;
-        }
+        textview_lines[i] = textview_lines[i] + 8192;
     }
+    text_base_offset = text_base_offset - 8192;
+
 }
 void l3_textview_page_down() {
     ++page_table_index;
     for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
-        if (textview_lines[i]) {
-            textview_lines[i] = textview_lines[i] - 8192;
-            text_offset = text_offset - 8192;
-        }
+        textview_lines[i] = textview_lines[i] - 8192;
     }
+    text_base_offset = text_base_offset + 8192;
 }
 
 void l3_textview_scroll_up(uint8_t steps) {
@@ -177,15 +175,16 @@ void l3_textview_scroll_up(uint8_t steps) {
 
             found:
             // rewind the display counter
-            text_seen = text_seen - (textview_lines[1] - textview_lines[0]);
+            text_view_start = text_view_start - (textview_lines[1] - textview_lines[0]);
 
             /* PAGE *IN* GRAPHICS BANKS */
             l3_textview_memory_display();
             /****************************/
         } else {
             // skip backwards 16 bytes
+
             textview_lines[0] = textview_lines[0] - 16;
-            text_seen = text_seen - 16;
+            text_view_start = text_view_start - 16;
         }
         to_draw = true;
     }
@@ -197,11 +196,11 @@ void l3_textview_scroll_down(uint8_t steps) {
     bool to_draw = false;
     while(steps--) {
         if (textview_lines[TEXTVIEW_MAX_ROWS - 1] == 0xFFFF) goto exit;
-        if (text_seen+(16*TEXTVIEW_MAX_ROWS) >= text_size) goto exit;
+        if (text_view_start+(16*TEXTVIEW_MAX_ROWS) >= text_size) goto exit;
 
         uint8_t old_line = 0, next_line = 1;
 
-        text_seen = text_seen + (textview_lines[next_line] - textview_lines[old_line]);
+        text_view_start = text_view_start + (textview_lines[next_line] - textview_lines[old_line]);
         for (; next_line < TEXTVIEW_MAX_ROWS; ++next_line) {
             textview_lines[old_line] = textview_lines[next_line];
             old_line = next_line;
@@ -252,10 +251,10 @@ void l3_textview_scroll_right() {
         }
     }
     else {
-        if(text_size>text_seen+8192) {
+        if(text_size>text_view_start+8192) {
             ++page_table_index;
-            text_offset = text_offset + 8192;
-            text_seen = text_seen + 8192;
+            text_base_offset = text_base_offset + 8192;
+            text_view_start = text_view_start + 8192;
             l3_textview_draw_window();
             l3_textview_draw_status();
         }
@@ -271,10 +270,19 @@ void l3_textview_scroll_left() {
         }
     }
     else {
-        if(text_seen>8191) {
-            --page_table_index;
-            text_offset = text_offset - 8192;
-            text_seen = text_seen - 8192;
+        if(text_view_start>8191) {
+            if(page_table_index) {
+                --page_table_index;
+                text_base_offset = text_base_offset - 8192;
+            }
+            else {
+                for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
+                    if (textview_lines[i]) {
+                        textview_lines[i] = textview_lines[i] - 8192;
+                    }
+                }
+            }
+            text_view_start = text_view_start - 8192;
             l3_textview_draw_window();
             l3_textview_draw_status();
         }
@@ -282,6 +290,10 @@ void l3_textview_scroll_left() {
 }
 
 void l3_textview_draw_window() {
+    sprintf(row, "line[0]:%d Pg: %d Vw:%lu Base:%lu======", textview_lines[0], page_table_index,
+            text_view_start, text_base_offset);
+    l3_goto(0,0);
+    l3_puts(row);
     memset(row, 32, 80);
     if(l3_textview_mode == 0) {
         overflow_right = false;
@@ -350,7 +362,7 @@ void l3_textview_draw_window() {
             /****************************/
             memcpy(hex_row, &ula_bank[textview_lines[i]], 16);
             sprintf(row, " %08lx \xB3%02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x\xB3",
-                    text_seen + (i*16),
+                    text_view_start + (i*16),
                     hex_row[0], hex_row[1], hex_row[2], hex_row[3], hex_row[4], hex_row[5], hex_row[6], hex_row[7],
                     hex_row[8], hex_row[9], hex_row[10],hex_row[11],hex_row[12],hex_row[13],hex_row[14],hex_row[15]
                 );

@@ -112,54 +112,54 @@ void less(char *title, unsigned char text_in, uint8_t viewer_mode) {
         // find result
         switch(c) {
             case 8:
-                l3_textview_memory_scroll_left(1);
+                l3_textview_scroll_left();
                 break;
             case 9:
-                l3_textview_memory_scroll_right(1);
+                l3_textview_scroll_right();
                 break;
             case 10:
             case '6':
-                l3_textview_memory_scroll_down(1);
+                l3_textview_scroll_down(1);
                 break;
             case '7':
             case 11:
-                l3_textview_memory_scroll_up(1);
+                l3_textview_scroll_up(1);
                 break;
             case 'y':
-                l3_textview_memory_scroll_down(4);
+                l3_textview_scroll_down(4);
                 break;
             case 'Y':
-                l3_textview_memory_scroll_down(8);
+                l3_textview_scroll_down(8);
                 break;
             case 'u':
-                l3_textview_memory_scroll_up(4);
+                l3_textview_scroll_up(4);
                 break;
             case 'U':
-                l3_textview_memory_scroll_up(8);
+                l3_textview_scroll_up(8);
                 break;
             case 'h':
-                l3_textview_memory_scroll_down(16);
+                l3_textview_scroll_down(16);
                 break;
             case 'H':
-                l3_textview_memory_scroll_down(32);
+                l3_textview_scroll_down(32);
                 break;
             case 'j':
-                l3_textview_memory_scroll_up(16);
+                l3_textview_scroll_up(16);
                 break;
             case 'J':
-                l3_textview_memory_scroll_up(32);
+                l3_textview_scroll_up(32);
                 break;
             case 'n':
-                l3_textview_memory_scroll_down(64);
+                l3_textview_scroll_down(64);
                 break;
             case 'N':
-                l3_textview_memory_scroll_down(128);
+                l3_textview_scroll_down(128);
                 break;
             case 'm':
-                l3_textview_memory_scroll_up(64);
+                l3_textview_scroll_up(64);
                 break;
             case 'M':
-                l3_textview_memory_scroll_up(128);
+                l3_textview_scroll_up(128);
                 break;
 
             case 'q':

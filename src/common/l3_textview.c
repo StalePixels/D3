@@ -124,61 +124,80 @@ void l3_textview_init(char *title, uint32_t size) {
     }
 }
 
-void l3_textview_memory_scroll_up(uint8_t steps) {
-    if (textview_lines[0] < 1000 && page_table_index) {
-        --page_table_index;
-        for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
-            if (textview_lines[i]) {
-                textview_lines[i] = textview_lines[i] + 8192;
-                text_offset = text_offset + 8192;
-            }
+void l3_textview_page_up() {
+    --page_table_index;
+    for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
+        if (textview_lines[i]) {
+            textview_lines[i] = textview_lines[i] + 8192;
+            text_offset = text_offset + 8192;
         }
     }
-    if (!textview_lines[0]) return;
-
-    for (next_line = TEXTVIEW_MAX_ROWS - 1; next_line != 0;) {
-        uint8_t old_line = next_line--;
-        textview_lines[old_line] = textview_lines[next_line];
-    }
-
-    if(l3_textview_mode == 0) {
-        // search backwards for text
-        next_char = textview_lines[0] - 2;
-
-        /* PAGE OUT GRAPHICS BANKS! */
-        l3_textview_memory_data();
-        /****************************/
-        while (next_char) {
-            if (ula_bank[next_char] == 10) {
-                textview_lines[0] = ++next_char;
-                goto found;
-            } else {
-                --next_char;
-            }
-
-            if (next_line != 0) break;
+}
+void l3_textview_page_down() {
+    ++page_table_index;
+    for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
+        if (textview_lines[i]) {
+            textview_lines[i] = textview_lines[i] - 8192;
+            text_offset = text_offset - 8192;
         }
-        textview_lines[0] = 0;
-
-        found:
-        // rewind the display counter
-        text_seen = text_seen - (textview_lines[1] - textview_lines[0]);
-
-        /* PAGE *IN* GRAPHICS BANKS */
-        l3_textview_memory_display();
-        /****************************/
     }
-    else {
-        // skip backwards 16 bytes
-        textview_lines[0] = textview_lines[0] - 16;
-        text_seen = text_seen - 16;
-    }
-    l3_textview_draw();
 }
 
-void l3_textview_memory_scroll_down(uint8_t steps) {
+void l3_textview_scroll_up(uint8_t steps) {
+    bool to_draw = false;
     while(steps--) {
-        if (textview_lines[TEXTVIEW_MAX_ROWS - 1] == 0xFFFF) return;
+        if (textview_lines[0] < (3 * 1024) && page_table_index) {
+            l3_textview_page_up();
+        }
+        else if (!textview_lines[0]) goto exit;
+
+        for (next_line = TEXTVIEW_MAX_ROWS - 1; next_line != 0;) {
+            uint8_t old_line = next_line--;
+            textview_lines[old_line] = textview_lines[next_line];
+        }
+
+        if (l3_textview_mode == 0) {
+            // search backwards for text
+            next_char = textview_lines[0] - 2;
+
+            /* PAGE OUT GRAPHICS BANKS! */
+            l3_textview_memory_data();
+            /****************************/
+            while (next_char) {
+                if (ula_bank[next_char] == 10) {
+                    textview_lines[0] = ++next_char;
+                    goto found;
+                } else {
+                    --next_char;
+                }
+
+                if (next_line != 0) break;
+            }
+            textview_lines[0] = 0;
+
+            found:
+            // rewind the display counter
+            text_seen = text_seen - (textview_lines[1] - textview_lines[0]);
+
+            /* PAGE *IN* GRAPHICS BANKS */
+            l3_textview_memory_display();
+            /****************************/
+        } else {
+            // skip backwards 16 bytes
+            textview_lines[0] = textview_lines[0] - 16;
+            text_seen = text_seen - 16;
+        }
+        to_draw = true;
+    }
+    exit:
+    if(to_draw) l3_textview_draw();
+}
+
+void l3_textview_scroll_down(uint8_t steps) {
+    bool to_draw = false;
+    while(steps--) {
+        if (textview_lines[TEXTVIEW_MAX_ROWS - 1] == 0xFFFF) goto exit;
+        if (text_seen+(16*TEXTVIEW_MAX_ROWS) >= text_size) goto exit;
 
         uint8_t old_line = 0, next_line = 1;
 
@@ -214,37 +233,52 @@ void l3_textview_memory_scroll_down(uint8_t steps) {
             textview_lines[TEXTVIEW_MAX_ROWS - 1] = textview_lines[TEXTVIEW_MAX_ROWS - 1] + 16;
         }
 
-        if (textview_lines[0] > 8192) {
-            ++page_table_index;
-            for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
-                if (textview_lines[i]) {
-                    textview_lines[i] = textview_lines[i] - 8192;
-                    text_offset = text_offset - 8192;
-                }
-            }
-            zx_border(page_table_index);
+        // Manage fold-over to next 8k page
+        if (textview_lines[0] > (13*1024)) {
+            l3_textview_page_down();
         }
+        to_draw = true;
     }
-    l3_textview_draw();
+    exit:
+    if(to_draw) l3_textview_draw();
 }
 
-void l3_textview_memory_scroll_right(uint8_t steps) {
+void l3_textview_scroll_right() {
     if(l3_textview_mode == 0) {
         if (overflow_right) {
             ++left_inset;
+            l3_textview_draw_window();
+            return;
         }
     }
     else {
-
+        if(text_size>text_seen+8192) {
+            ++page_table_index;
+            text_offset = text_offset + 8192;
+            text_seen = text_seen + 8192;
+            l3_textview_draw_window();
+            l3_textview_draw_status();
+        }
     }
-    l3_textview_draw_window();
 }
 
-void l3_textview_memory_scroll_left(uint8_t steps) {
-    if(left_inset) {
-        --left_inset;
+void l3_textview_scroll_left() {
+    if(l3_textview_mode == 0) {
+        if (left_inset) {
+            --left_inset;
+            l3_textview_draw_window();
+            return;
+        }
     }
-    l3_textview_draw_window();
+    else {
+        if(text_seen>8191) {
+            --page_table_index;
+            text_offset = text_offset - 8192;
+            text_seen = text_seen - 8192;
+            l3_textview_draw_window();
+            l3_textview_draw_status();
+        }
+    }
 }
 
 void l3_textview_draw_window() {

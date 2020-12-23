@@ -7,6 +7,7 @@ liblayer3/putc.c
 liblayer3/putc_raw.c
 liblayer3/init.c
 liblayer3/exit.c
+liblayer3/put_hex.c
 liblayer3/puts.c
 liblayer3/puts_raw.c
 liblayer3/revoff.c

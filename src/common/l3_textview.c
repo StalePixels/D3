@@ -118,9 +118,13 @@ void l3_textview_init(char *title, uint32_t size) {
 //                    "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD"
                     "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCB"
                     "Word 1\xF62\xCD\xCDWord 2\xF62\xBB");
-
-        L3ScreenColour = 2;
-        l3_putc(186);
+        for (i = 1; i < TEXTVIEW_MAX_ROWS; i++) {
+            l3_putc(0xBA);
+            L3ScreenColour = 0;
+            l3_puts( "          \xB3                                                \xB3                  ");
+            L3ScreenColour = 2;
+            l3_putc(0xBA);
+        }
         L3ScreenColour = 0;
     }
 }
@@ -294,8 +298,8 @@ void l3_textview_draw_window() {
 //            text_view_start, text_base_offset);
 //    l3_goto(0,0);
 //    l3_puts(row);
-    memset(row, 32, 80);
     if(l3_textview_mode == 0) {
+        memset(row, 32, 80);
         overflow_right = false;
         for (i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
 
@@ -355,26 +359,63 @@ void l3_textview_draw_window() {
         return;
     }
     else {
-        uint8_t hex_row[16];
         for (i = 0; i < TEXTVIEW_MAX_ROWS-1; i++) {
             /* PAGE OUT GRAPHICS BANKS! */
             l3_textview_memory_data();
             /****************************/
-            memcpy(hex_row, &ula_bank[textview_lines[i]], 16);
-            sprintf(row, " %08lx \xB3%02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x\xB3",
-                    text_view_start + (i*16),
-                    hex_row[0], hex_row[1], hex_row[2], hex_row[3], hex_row[4], hex_row[5], hex_row[6], hex_row[7],
-                    hex_row[8], hex_row[9], hex_row[10],hex_row[11],hex_row[12],hex_row[13],hex_row[14],hex_row[15]
-                );
+
+            memcpy(row, &ula_bank[textview_lines[i]], 16);
 
             /* PAGE *IN* GRAPHICS BANKS */
             l3_textview_memory_display();
             /****************************/
-            l3_goto(1, i+1);
-            l3_puts_raw(row, 60);
-            l3_puts_raw(&hex_row[0], 8);
-            L3ScreenX = L3ScreenX + 2;
-            l3_puts_raw(&hex_row[8], 8);
+
+            uint32_t row_offset = text_view_start + (i*16);
+            L3ScreenY = i + 1; L3ScreenX = 2;
+
+            l3_print_hex((row_offset>>24)&255);
+            l3_print_hex((row_offset>>16)&255);
+            l3_print_hex((row_offset>> 8)&255);
+            l3_print_hex((row_offset    )&255);
+
+            L3ScreenX = 12;
+            l3_print_hex(row[0]);
+            L3ScreenX = 15;
+            l3_print_hex(row[1]);
+            L3ScreenX = 18;
+            l3_print_hex(row[2]);
+            L3ScreenX = 21;
+            l3_print_hex(row[3]);
+            L3ScreenX = 24;
+            l3_print_hex(row[4]);
+            L3ScreenX = 27;
+            l3_print_hex(row[5]);
+            L3ScreenX = 30;
+            l3_print_hex(row[6]);
+            L3ScreenX = 33;
+            l3_print_hex(row[7]);
+
+            L3ScreenX = 37;
+            l3_print_hex(row[8]);
+            L3ScreenX = 40;
+            l3_print_hex(row[9]);
+            L3ScreenX = 43;
+            l3_print_hex(row[10]);
+            L3ScreenX = 46;
+            l3_print_hex(row[11]);
+            L3ScreenX = 49;
+            l3_print_hex(row[12]);
+            L3ScreenX = 52;
+            l3_print_hex(row[13]);
+            L3ScreenX = 55;
+            l3_print_hex(row[14]);
+            L3ScreenX = 58;
+            l3_print_hex(row[15]);
+
+            L3ScreenX = 61;
+            l3_puts_raw(&row[0], 8);
+            L3ScreenX = 71;
+            l3_puts_raw(&row[8], 8);
         }
     }
 }

@@ -290,10 +290,10 @@ void l3_textview_scroll_left() {
 }
 
 void l3_textview_draw_window() {
-    sprintf(row, "line[0]:%d Pg: %d Vw:%lu Base:%lu======", textview_lines[0], page_table_index,
-            text_view_start, text_base_offset);
-    l3_goto(0,0);
-    l3_puts(row);
+//    sprintf(row, "line[0]:%d Pg: %d Vw:%lu Base:%lu======", textview_lines[0], page_table_index,
+//            text_view_start, text_base_offset);
+//    l3_goto(0,0);
+//    l3_puts(row);
     memset(row, 32, 80);
     if(l3_textview_mode == 0) {
         overflow_right = false;

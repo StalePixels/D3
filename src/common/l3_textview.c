@@ -310,11 +310,13 @@ void l3_textview_draw_window() {
         overflow_right = false;
         uint8_t blanks = 0;
         for (i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
-            memset(row, 0, 80);
+            memset(row, 32, 80);
 
             if (textview_lines[i] == 0xFFFF) {
                 // We want the first blank
-                if(blanks++) goto blank_row;
+//                if(blanks++)
+                    goto blank_row;
+
             }
 
             /* PAGE OUT GRAPHICS BANKS! */
@@ -322,15 +324,18 @@ void l3_textview_draw_window() {
             /****************************/
 
             if (i < TEXTVIEW_MAX_ROWS - 1 &&
-                textview_lines[i] + left_inset < textview_lines[i + 1]) {
+                textview_lines[i] + left_inset < textview_lines[i + 1] &&
+                (textview_lines[i] + left_inset + j + text_base_offset < text_size))
+            {
                 memcpy(row, &ula_bank[textview_lines[i] + left_inset], TEXTVIEW_MAX_COLS);
                 goto clip_textview_row;
             }
             else if (i == TEXTVIEW_MAX_ROWS - 1) {
-
                 // Is this line long enough to print?
-                if (strlen(&ula_bank[textview_lines[i]]) > left_inset
-                    && strchr(&ula_bank[textview_lines[i]], 10) > &ula_bank[textview_lines[i]] + left_inset) {
+                if (strlen(&ula_bank[textview_lines[i]]) > left_inset)
+                // and contains a \n
+//                    && strchr(&ula_bank[textview_lines[i]], 10) > &ula_bank[textview_lines[i]] + left_inset)) ||
+                {
                     for (j = 0; j < TEXTVIEW_MAX_COLS; j++) {
                         if(textview_lines[i] + left_inset + j + text_base_offset < text_size) {
                             row[j] = ula_bank[textview_lines[i] + left_inset + j];
@@ -339,7 +344,7 @@ void l3_textview_draw_window() {
                                 goto print_textview_row;
                             }
                             if (row[j] == 0) {  // Found a string terminator
-                                row[j] = '@';   // Unset the string terminator
+                                row[j] = ' ';   // Unset the string terminator
                             }
                         } else {
                             row[j] = 0;

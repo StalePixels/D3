@@ -17,7 +17,6 @@
 #include "common/startup.h"
 #include "less/less.h"
 
-
 const char *help_text[] = {
         "\nLESS",
         "====",
@@ -31,7 +30,6 @@ const char *help_text[] = {
         " .LESS -x /path/to/file.bin",
         "\nDetails at http://zxn.gg/less",
 };
-
 
 void exit_with_help(int exit_value) {
     d3_logo(); printf("LESS\n");

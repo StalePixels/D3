@@ -199,8 +199,12 @@ void l3_textview_scroll_up(uint8_t steps) {
 void l3_textview_scroll_down(uint8_t steps) {
     bool to_draw = false;
     while(steps--) {
-        if (textview_lines[TEXTVIEW_MAX_ROWS - 1] == 0xFFFF) goto exit;
-        if (text_view_start+(16*TEXTVIEW_MAX_ROWS) >= text_size) goto exit;
+        if (textview_lines[TEXTVIEW_MAX_ROWS - 1] == 0xFFFF) {
+            zx_border(INK_RED);
+            goto exit;
+        }
+
+        if (l3_textview_mode && text_view_start+(16*TEXTVIEW_MAX_ROWS) >= text_size) goto exit;
 
         uint8_t old_line = 0, next_line = 1;
 
@@ -211,26 +215,31 @@ void l3_textview_scroll_down(uint8_t steps) {
         }
 
         if (l3_textview_mode == 0) {
-            // search forwards for text
+            // we can't do this via "data size" because lines are variable length.
+            // so.... search forwards for next line of text
             next_char = textview_lines[TEXTVIEW_MAX_ROWS - 1];
 
             /* PAGE OUT GRAPHICS BANKS! */
             l3_textview_memory_data();
             /****************************/
-            while (ula_bank[next_char]) {
+
+            while (text_base_offset+next_char < text_size) {
                 if (ula_bank[next_char] == 10) {
                     textview_lines[TEXTVIEW_MAX_ROWS - 1] = ++next_char;
                     goto found;
                 } else {
+                    skip:
                     ++next_char;
                 }
             }
             textview_lines[TEXTVIEW_MAX_ROWS - 1] = 0xFFFF;
 
             found:
+
             /* PAGE *IN* GRAPHICS BANKS */
             l3_textview_memory_display();
             /****************************/
+
         } else {
             // skip forwards 16 bytes
             textview_lines[TEXTVIEW_MAX_ROWS - 1] = textview_lines[TEXTVIEW_MAX_ROWS - 1] + 16;
@@ -294,10 +303,6 @@ void l3_textview_scroll_left() {
 }
 
 void l3_textview_draw_window() {
-//    sprintf(row, "line[0]:%d Pg: %d Vw:%lu Base:%lu======", textview_lines[0], page_table_index,
-//            text_view_start, text_base_offset);
-//    l3_goto(0,0);
-//    l3_puts(row);
     if(l3_textview_mode == 0) {
         memset(row, 32, 80);
         overflow_right = false;
@@ -308,6 +313,7 @@ void l3_textview_draw_window() {
             /* PAGE OUT GRAPHICS BANKS! */
             l3_textview_memory_data();
             /****************************/
+
             if (i < TEXTVIEW_MAX_ROWS - 1 &&
                 &ula_bank[textview_lines[i] + left_inset] < &ula_bank[textview_lines[i + 1]]) {
                 memcpy(row, &ula_bank[textview_lines[i] + left_inset], TEXTVIEW_MAX_COLS);

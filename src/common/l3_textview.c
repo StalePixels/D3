@@ -96,9 +96,13 @@ void l3_textview_init(char *title, uint32_t size) {
         /* PAGE *IN* GRAPHICS BANKS */
         l3_textview_memory_display();
         /****************************/
+        for (i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
+            l3_goto(0,i);
+            l3_clear_to_eol();
+        }
     }
     else {
-        for(uint8_t i = 1; i < TEXTVIEW_MAX_ROWS; ++i) {
+        for(i = 1; i < TEXTVIEW_MAX_ROWS; ++i) {
             textview_lines[i] = textview_lines[i-1] + 16;
 
             l3_goto(0, i);
@@ -239,7 +243,6 @@ void l3_textview_scroll_down(uint8_t steps) {
             /* PAGE *IN* GRAPHICS BANKS */
             l3_textview_memory_display();
             /****************************/
-
         } else {
             // skip forwards 16 bytes
             textview_lines[TEXTVIEW_MAX_ROWS - 1] = textview_lines[TEXTVIEW_MAX_ROWS - 1] + 16;
@@ -304,10 +307,10 @@ void l3_textview_scroll_left() {
 
 void l3_textview_draw_window() {
     if(l3_textview_mode == 0) {
-        memset(row, 32, 80);
         overflow_right = false;
         uint8_t blanks = 0;
         for (i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
+            memset(row, 0, 80);
 
             if (textview_lines[i] == 0xFFFF) {
                 // We want the first blank
@@ -324,9 +327,6 @@ void l3_textview_draw_window() {
                 goto clip_textview_row;
             }
             else if (i == TEXTVIEW_MAX_ROWS - 1) {
-/*
- * 100% sure the last line problem is in here
- */
 
                 // Is this line long enough to print?
                 if (strlen(&ula_bank[textview_lines[i]]) > left_inset
@@ -371,8 +371,8 @@ void l3_textview_draw_window() {
             /****************************/
 
             l3_goto(0, i);
-            l3_puts(row);
-            if (L3ScreenY == i) l3_clear_to_eol();
+            l3_puts_raw(row, j);
+            l3_clear_to_eol();
         }
 
         return;

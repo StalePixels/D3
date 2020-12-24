@@ -11,6 +11,7 @@
 
 void l3_puts_raw(const char* s, const uint8_t len)
 {
+
 	while (len--)
 	{
 		uint16_t c = *s++;

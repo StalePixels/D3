@@ -15,7 +15,7 @@ void l3_putc_raw(uint16_t c)
     if (L3ScreenY >= LIBLAYER3_SCREENHEIGHT)
             return;
 
-    if (c < 32) c = 32;
+    if (c < 32) c = ' ';
 
     tilemap[L3ScreenY][L3ScreenX].tile = c;
 	L3ScreenX++;

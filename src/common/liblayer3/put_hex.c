@@ -1,6 +1,6 @@
 #include "liblayer3.h"
 
-void l3_print_hex(uint8_t hex) {
+void l3_print_hex(const char hex) {
     unsigned char c;
 
     // Nybble 1

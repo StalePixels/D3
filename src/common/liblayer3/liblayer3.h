@@ -73,7 +73,7 @@ extern void l3_goto(uint8_t x, uint8_t y);
 extern void l3_clear(void);
 extern void l3_putc_raw(uint16_t c);
 extern void l3_putc(uint16_t c);
-extern void l3_put_hex(const char* s);
+extern void l3_print_hex(const char hex);
 extern void l3_puts(const char* s);
 extern void l3_puts_raw(const char* s, uint8_t len);
 extern uint8_t l3_getc(void);

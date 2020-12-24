@@ -204,7 +204,7 @@ void l3_textview_scroll_down(uint8_t steps) {
             goto exit;
         }
 
-        if (l3_textview_mode && text_view_start+(16*TEXTVIEW_MAX_ROWS) >= text_size) goto exit;
+        if (l3_textview_mode && text_view_start+(16*(TEXTVIEW_MAX_ROWS-1)) >= text_size) goto exit;
 
         uint8_t old_line = 0, next_line = 1;
 
@@ -306,30 +306,43 @@ void l3_textview_draw_window() {
     if(l3_textview_mode == 0) {
         memset(row, 32, 80);
         overflow_right = false;
+        uint8_t blanks = 0;
         for (i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
 
-            if (textview_lines[i] == 0xFFFF) goto blank_row;
+            if (textview_lines[i] == 0xFFFF) {
+                // We want the first blank
+                if(blanks++) goto blank_row;
+            }
 
             /* PAGE OUT GRAPHICS BANKS! */
             l3_textview_memory_data();
             /****************************/
 
             if (i < TEXTVIEW_MAX_ROWS - 1 &&
-                &ula_bank[textview_lines[i] + left_inset] < &ula_bank[textview_lines[i + 1]]) {
+                textview_lines[i] + left_inset < textview_lines[i + 1]) {
                 memcpy(row, &ula_bank[textview_lines[i] + left_inset], TEXTVIEW_MAX_COLS);
                 goto clip_textview_row;
-            } else if (i == TEXTVIEW_MAX_ROWS - 1) {
+            }
+            else if (i == TEXTVIEW_MAX_ROWS - 1) {
+/*
+ * 100% sure the last line problem is in here
+ */
+
                 // Is this line long enough to print?
                 if (strlen(&ula_bank[textview_lines[i]]) > left_inset
                     && strchr(&ula_bank[textview_lines[i]], 10) > &ula_bank[textview_lines[i]] + left_inset) {
                     for (j = 0; j < TEXTVIEW_MAX_COLS; j++) {
-                        row[j] = ula_bank[textview_lines[i] + left_inset + j];
-                        if (row[j] == 10) {
-                            row[j] = 0; // Set the string terminator
-                            goto print_textview_row;
-                        } // Found a string terminator
-                        if (row[j] == 0) {
-                            goto print_textview_row;
+                        if(textview_lines[i] + left_inset + j + text_base_offset < text_size) {
+                            row[j] = ula_bank[textview_lines[i] + left_inset + j];
+                            if (row[j] == 10) { // End of line
+                                row[j] = 0;     // Set the string terminator
+                                goto print_textview_row;
+                            }
+                            if (row[j] == 0) {  // Found a string terminator
+                                row[j] = '@';   // Unset the string terminator
+                            }
+                        } else {
+                            row[j] = 0;
                         }
                     }
                     goto clip_textview_row;
@@ -379,10 +392,10 @@ void l3_textview_draw_window() {
             uint32_t row_offset = text_view_start + (i*16);
             L3ScreenY = i + 1; L3ScreenX = 2;
 
-            l3_print_hex((row_offset>>24)&255);
-            l3_print_hex((row_offset>>16)&255);
-            l3_print_hex((row_offset>> 8)&255);
-            l3_print_hex((row_offset    )&255);
+            l3_print_hex((uint8_t )((row_offset>>24)&255));
+            l3_print_hex((uint8_t )((row_offset>>16)&255));
+            l3_print_hex((uint8_t )((row_offset>> 8)&255));
+            l3_print_hex((uint8_t )((row_offset    )&255));
 
             L3ScreenX = 12;
             l3_print_hex(row[0]);

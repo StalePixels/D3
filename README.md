@@ -16,6 +16,8 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .LESS - Less is not more. A plain text pager with extra features, a compliment, not replacement, for MORE  - thanks Marco.
 
+.NXIPOP - NXI Priority Override Picker. Overlay a second L2 image on a first, using pixel priorities.
+
 Notable Changes
 -
 * V 0.1.0         First stable public, with INI
@@ -24,6 +26,7 @@ Notable Changes
 * V 0.4.0         Fourth stable public, with CH8SHOW
 * V 0.4.2         Minor stable public, with INKEY
 * V 0.5.0         Fifth stable public, with LESS
+* V 0.5.0         Sixth stable public, with NXIPOP
 
 
 

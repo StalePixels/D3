@@ -35,9 +35,9 @@ LS := ls -l@k
 VERSION := `cat VERSION`
 DATE := `which date`
 
-default: q_less
+default: q_nxipop
 
-all: ini every untar ch8show inkey less
+all: ini every untar ch8show inkey less nxipop
 
 clean:
 	$(RM) $(BUILD_DIR)
@@ -88,17 +88,18 @@ incs: dirs
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 
-release: ini every untar ch8show inkey less
+release: ini every untar ch8show inkey less nxipop
 	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
 	$(CP) $(BUILD_DIR)/UNTAR.DOT $(RELEASE_DIR)/UNTAR
 	$(CP) $(BUILD_DIR)/CH8SHOW.DOT $(RELEASE_DIR)/CH8SHOW
+	$(CP) $(BUILD_DIR)/NXIPOP.DOT $(RELEASE_DIR)/NXIPOP
 	$(CP) $(BUILD_DIR)/INKEY.DOT $(RELEASE_DIR)/INKEY
 	$(CP) $(BUILD_DIR)/LESS.DOT $(RELEASE_DIR)/LESS
 
-install: install_every install_ini install_untar install_ch8show install_inkey install_less
+install: install_every install_ini install_untar install_ch8show install_nxipop install_inkey install_less
 
-uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_inkey uninstall_less
+uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_nxipop uninstall_inkey uninstall_less
 
 
 #
@@ -167,6 +168,22 @@ q_ch8show: ch8show install_ch8show
 
 uninstall_ch8show:
 	$(RM) $(INSTALL_BASE)/dot/CH8SHOW
+
+#
+# NXIPOP
+#
+nxipop: deps dirs
+	$(CC) $(CCFLAGS) $(LDFLAGS) @src/nxipop.lst -oNXIPOP -create-app \
+		-subtype=dotn $(CZFLAGS)
+	$(MV) NXIPOP $(BUILD_DIR)/NXIPOP.DOT
+
+install_nxipop:
+	$(CP) $(BUILD_DIR)/NXIPOP.DOT $(INSTALL_BASE)/dot/NXIPOP
+
+q_nxipop: nxipop install_nxipop
+
+uninstall_nxipop:
+	$(RM) $(INSTALL_BASE)/dot/NXIPOP
 
 
 #

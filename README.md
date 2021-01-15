@@ -26,7 +26,7 @@ Notable Changes
 * V 0.4.0         Fourth stable public, with CH8SHOW
 * V 0.4.2         Minor stable public, with INKEY
 * V 0.5.0         Fifth stable public, with LESS
-* V 0.5.0         Sixth stable public, with NXIPOP
+* V 0.6.0         Sixth stable public, with NXIPOP
 
 
 

@@ -12,8 +12,13 @@ Z88DK_CRT = 30
 
 #DEBUGFLAGS := --list --c-code-in-asm
 
-CC=zcc
-CCFLAGS=+zxn -vn -O3 -startup=$(Z88DK_CRT) -clib=new -pragma-include:zpragma.inc
+# z88dk runs in its Docker image, with this directory mounted at the same path
+Z88DK_IMAGE ?= z88dk/z88dk:latest
+Z88DK_RUN = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -v $(CURDIR):$(CURDIR) -w $(CURDIR) $(Z88DK_IMAGE)
+
+ZOPT ?= --max-allocs-per-node200000
+CC=$(Z88DK_RUN) zcc
+CCFLAGS=+zxn -vn -startup=$(Z88DK_CRT) -clib=sdcc_iy -SO3 $(ZOPT) --opt-code-size -pragma-include:zpragma.inc
 CZFLAGS=-Cz="--clean --fullsize --main-fence 0xC000"
 LDFLAGS=-m -lm
 INCFLAGS=
@@ -37,7 +42,7 @@ DATE := `which date`
 
 default: q_less
 
-all: ini every untar ch8show inkey less
+all: ini every untar ch8show inkey less xcopy gunzip
 
 clean:
 	$(RM) $(BUILD_DIR)
@@ -50,6 +55,7 @@ clean:
 	$(RM) *_CODE.bin
 	$(RM) *_UNASSIGNED.bin
 	$(RM) *_UNASSIGNED.bin
+	$(RM) $(GUNZIP_DIR)/inflate_PAGEA.bin $(GUNZIP_DIR)/inflate_PAGEC.bin
 
 rel-clean: clean
 	$(RM) $(RELEASE_DIR)
@@ -88,17 +94,19 @@ incs: dirs
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 
-release: ini every untar ch8show inkey less
+release: ini every untar ch8show inkey less xcopy gunzip
 	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
 	$(CP) $(BUILD_DIR)/UNTAR.DOT $(RELEASE_DIR)/UNTAR
 	$(CP) $(BUILD_DIR)/CH8SHOW.DOT $(RELEASE_DIR)/CH8SHOW
 	$(CP) $(BUILD_DIR)/INKEY.DOT $(RELEASE_DIR)/INKEY
 	$(CP) $(BUILD_DIR)/LESS.DOT $(RELEASE_DIR)/LESS
+	$(CP) $(BUILD_DIR)/XCOPY.DOT $(RELEASE_DIR)/XCOPY
+	$(CP) $(BUILD_DIR)/GUNZIP.DOT $(RELEASE_DIR)/GUNZIP
 
-install: install_every install_ini install_untar install_ch8show install_inkey install_less
+install: install_every install_ini install_untar install_ch8show install_inkey install_less install_xcopy install_gunzip
 
-uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_inkey uninstall_less
+uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_inkey uninstall_less uninstall_xcopy uninstall_gunzip
 
 
 #
@@ -116,6 +124,47 @@ q_ini: ini install_ini
 
 uninstall_ini:
 	$(RM) $(INSTALL_BASE)/dot/INI
+
+
+#
+# XCOPY
+#
+xcopy: deps dirs
+	$(CC) $(CCFLAGS) $(LDFLAGS) @src/xcopy.lst -oXCOPY -create-app \
+		-subtype=dotn $(CZFLAGS)
+	$(MV) XCOPY $(BUILD_DIR)/XCOPY.DOT
+
+install_xcopy:
+	$(CP) $(BUILD_DIR)/XCOPY.DOT $(INSTALL_BASE)/dot/XCOPY
+
+q_xcopy: xcopy install_xcopy
+
+uninstall_xcopy:
+	$(RM) $(INSTALL_BASE)/dot/XCOPY
+
+
+#
+# GUNZIP
+#
+GUNZIP_DIR = src/gunzip
+
+# The decoder's two code images, assembled on their own inside src/gunzip
+$(GUNZIP_DIR)/inflate_PAGEA.bin $(GUNZIP_DIR)/inflate_PAGEC.bin: $(GUNZIP_DIR)/inflate.asm $(GUNZIP_DIR)/inflate_job.inc
+	$(Z88DK_RUN) sh -c "cd $(GUNZIP_DIR) && z88dk-z80asm -mz80n -b inflate.asm"
+	rm -f $(GUNZIP_DIR)/inflate.o $(GUNZIP_DIR)/inflate.bin
+
+gunzip: deps dirs $(GUNZIP_DIR)/inflate_PAGEA.bin $(GUNZIP_DIR)/inflate_PAGEC.bin
+	$(CC) $(CCFLAGS) $(LDFLAGS) -Ddotn -Ca-I$(CURDIR)/$(GUNZIP_DIR) @src/gunzip.lst -oGUNZIP -create-app \
+		-subtype=dotn $(CZFLAGS)
+	$(MV) GUNZIP $(BUILD_DIR)/GUNZIP.DOT
+
+install_gunzip:
+	$(CP) $(BUILD_DIR)/GUNZIP.DOT $(INSTALL_BASE)/dot/GUNZIP
+
+q_gunzip: gunzip install_gunzip
+
+uninstall_gunzip:
+	$(RM) $(INSTALL_BASE)/dot/GUNZIP
 
 
 #

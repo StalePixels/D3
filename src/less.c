@@ -1,6 +1,5 @@
 // I'm a banker, move my stack down...
 #pragma output REGISTER_SP = 0xBFE0
-#pragma printf = "%d %s %c %X %lu %f lx %x"
 
 #include <z80.h>
 #include <arch/zxn.h>

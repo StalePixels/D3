@@ -36,5 +36,11 @@ bool ini_get_line(bool inc_comments) {
         r = esxdos_f_read(ini_in, &c, 1);
     }
 
+    // The last line, with no newline after it
+    if (ini_char) {
+        ini_line[ini_char] = 0;
+        return true;
+    }
+
     return false;
 }

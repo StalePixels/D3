@@ -24,7 +24,11 @@ void create_dir(char *pathname) {
     /* Try creating the directory. */
     r = esx_f_mkdir(pathname);
 
-    if(errno==18) return;
+    // An existing directory is not an error
+    if(errno==18) {
+        errno = 0;
+        return;
+    }
     if (r != 0) {
         /* On failure, try creating parent directory. */
         p = strrchr(pathname, '/');
@@ -37,4 +41,6 @@ void create_dir(char *pathname) {
     }
     if (r != 0)
         printf("Could not create directory %s\n", pathname);
+    else
+        errno = 0;      // a failed first try left its error code
 }

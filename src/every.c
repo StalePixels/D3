@@ -22,7 +22,7 @@ unsigned char file_in, file_out;
 uint16_t counter = 0;
 
 const char database[] = "/SYS/EVERY.CFG";
-char *tmp_filename[] = "/SYS/EVERY$$$.CFG";
+char tmp_filename[] = "/SYS/EVERY$$$.CFG";
 char default_key[] = "default";
 
 char *user_key;

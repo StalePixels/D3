@@ -121,7 +121,7 @@ void l3_textview_init(char *title, uint32_t size) {
                     "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD""Bytes 8\xAF""f"
 //                    "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD"
                     "\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCD\xCB"
-                    "Word 1\xF62\xCD\xCDWord 2\xF62\xBB");
+                    "Word 1\xF6""2\xCD\xCDWord 2\xF6""2\xBB");
         for (i = 1; i < TEXTVIEW_MAX_ROWS; i++) {
             l3_putc(0xBA);
             L3ScreenColour = 0;

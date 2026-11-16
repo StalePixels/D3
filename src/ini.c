@@ -24,7 +24,7 @@ uint16_t old_counter = 0;
 uint8_t verbose = 0;
 
 const char *database;
-const char *tmp_filename[] = "/TMP/INI$$$$$.TMP";
+char tmp_filename[] = "/TMP/INI$$$$$.TMP";
 
 char *user_key;
 

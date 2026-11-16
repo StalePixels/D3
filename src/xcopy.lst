@@ -1,0 +1,16 @@
+xcopy.c
+xcopy/path.c
+xcopy/ui.c
+xcopy/copy.c
+xcopy/walk.c
+xcopy/nbnwalk.c
+xcopy/nbnmatch.c
+xcopy/nbn/nbn.c
+xcopy/nbn/nbn_pages.c
+xcopy/nbn/net.c
+xcopy/nbn/uart.c
+xcopy/nbn/util.c
+xcopy/nbn/messages.asm
+xcopy/xcopy.asm
+xcopy/cmdline.asm
+common/d3.c

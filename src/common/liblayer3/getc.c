@@ -24,7 +24,7 @@ static uint8_t next_key = 0;
 static uint8_t repeat_counter;
 static bool	key_repeating = false;
 
-void l3_cursor() {
+void l3_cursor(void) {
 	L3CursorFlashRate--;
     WAIT_FOR_SCANLINE(239);
     if(L3CursorFlashRate ==0) {

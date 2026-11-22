@@ -15,16 +15,21 @@
 #include "startup.h"
 
 static unsigned char old_cpu_speed;
+static unsigned char old_scr_ct;
 
-void at_exit() {
+void at_exit(void) {
     // Restore CPU Speed
     ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
+    // Restore the ROM scroll count (SCR_CT)
+    z80_bpoke(23692, old_scr_ct);
     intrinsic_ei();
 }
 
-void startup() {
+void startup(void) {
     // Store CPU speed
     old_cpu_speed = ZXN_READ_REG(REG_TURBO_MODE);
+    // Store the ROM scroll count (SCR_CT); UNTAR sets it to 255
+    old_scr_ct = z80_bpeek(23692);
     // Set CPU speed to 28Mhz
     ZXN_NEXTREG(REG_TURBO_MODE, 3);
     // Restore to original atexit

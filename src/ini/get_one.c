@@ -36,5 +36,5 @@ bool ini_get_one(const char *filename, const char *key) {
     done:
     esxdos_f_close(ini_in);
 
-    return (ini_value ? true : false);
+    return ((bool)ini_value);
 }

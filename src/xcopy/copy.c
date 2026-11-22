@@ -241,6 +241,7 @@ void copy_file(const char *sfn, const char *lfn, uint8_t attr)
 
     if ((exists = dst_prepare(0)) == XC_DST_SKIP) goto done;
 
+    XC_NO_SCROLL();
     printf("%s\n", dst_path);
 
     errno = 0;

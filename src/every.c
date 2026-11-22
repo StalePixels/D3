@@ -43,7 +43,7 @@ const char *help_text[] = {
         "\nDetails at http://zxn.gg/every"
 };
 
-void exit_with_help() {
+void exit_with_help(void) {
     d3_logo(); printf(" EVERY\n");
     for(uint8_t help=0;help<9;help++)
         printf("%s\n", help_text[help]);
@@ -93,5 +93,5 @@ int main(int argc, char** argv) {
     sprintf(user_buffer, "%d", stored_value);
     ini_set_one(database, user_key, user_buffer);
 
-    exit(errno);
+    return errno;
 }

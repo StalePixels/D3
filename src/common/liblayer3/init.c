@@ -35,7 +35,7 @@ uint8_t LogoTile2[8] = {
         0b11111111,
 };
 
-void l3_init() {
+void l3_init(void) {
     // We're going to trash this area for the Editor canvas, so let's back it up so we can restore it
     memcpy(L3tilemap, tilemap, sizeof(L3tilemap));
     memcpy(L3tiles, tiles, sizeof(L3tiles));

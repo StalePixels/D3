@@ -31,7 +31,7 @@ uint8_t page_table_index;
 static uint8_t ula2, ula3, ula6, ula7,
                 i;  // reusable iterator
 
-void less_exit() {
+void less_exit(void) {
     l3_exit();
 
     // Free all the memory we reserved
@@ -57,7 +57,6 @@ void less(char *title, unsigned char text_in, uint8_t viewer_mode) {
     ula6 = ZXN_READ_REG(REG_MMU0 + 6);
     ula7 = ZXN_READ_REG(REG_MMU0 + 7);
 
-    unsigned char row[81];
     total_8k_pages = 1 + (finfo.size/8192);
     printf("8K pages required: %d [", total_8k_pages);
     i = 0;
@@ -76,12 +75,12 @@ void less(char *title, unsigned char text_in, uint8_t viewer_mode) {
 
         ZXN_WRITE_MMU2(page_table[i]);  /*  MAP TEXT BUFFER OVER ULA! DANGERZONE! */
 
-        memset(0x4000, 0, 8192);
+        memset((void *)0x4000, 0, 8192);
         if(i!=total_8k_pages-1) {
-            esx_f_read(text_in, 0x4000, 8192);
+            esx_f_read(text_in, (void *)0x4000, 8192);
         }
         else {
-            esx_f_read(text_in, 0x4000, finfo.size % 8192);
+            esx_f_read(text_in, (void *)0x4000, finfo.size % 8192);
         }
         ZXN_WRITE_MMU2(10);              /* RESTORE ULA! DANGERZONE! */
         ++i;

@@ -42,17 +42,17 @@ uint8_t l3_textview_mode;
 
 static bool overflow_right = false;
 
-void l3_textview_memory_data() {
+void l3_textview_memory_data(void) {
     ZXN_WRITE_MMU2(page_table[page_table_index]);
     ZXN_WRITE_MMU3(page_table[page_table_index + 1]);
 }
 
-void l3_textview_memory_display() {
+void l3_textview_memory_display(void) {
     ZXN_WRITE_MMU2(10);
     ZXN_WRITE_MMU3(11);
 }
 
-void l3_textview_draw_status() {
+void l3_textview_draw_status(void) {
     L3ScreenColour = 2;
     l3_goto(0, TEXTVIEW_MAX_ROWS);
     sprintf(row, " %-44s %8lu/%8lubytes ", text_title, text_view_start, text_size);
@@ -133,7 +133,7 @@ void l3_textview_init(char *title, uint32_t size) {
     }
 }
 
-void l3_textview_page_up() {
+void l3_textview_page_up(void) {
     --page_table_index;
     for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
         textview_lines[i] = textview_lines[i] + 8192;
@@ -141,7 +141,7 @@ void l3_textview_page_up() {
     text_base_offset = text_base_offset - 8192;
 
 }
-void l3_textview_page_down() {
+void l3_textview_page_down(void) {
     ++page_table_index;
     for (uint8_t i = 0; i < TEXTVIEW_MAX_ROWS; i++) {
         textview_lines[i] = textview_lines[i] - 8192;
@@ -258,7 +258,7 @@ void l3_textview_scroll_down(uint8_t steps) {
     if(to_draw) l3_textview_draw();
 }
 
-void l3_textview_scroll_right() {
+void l3_textview_scroll_right(void) {
     if(l3_textview_mode == 0) {
         if (overflow_right) {
             ++left_inset;
@@ -277,7 +277,7 @@ void l3_textview_scroll_right() {
     }
 }
 
-void l3_textview_scroll_left() {
+void l3_textview_scroll_left(void) {
     if(l3_textview_mode == 0) {
         if (left_inset) {
             --left_inset;
@@ -305,7 +305,7 @@ void l3_textview_scroll_left() {
     }
 }
 
-void l3_textview_draw_window() {
+void l3_textview_draw_window(void) {
     if(l3_textview_mode == 0) {
         overflow_right = false;
         uint8_t blanks = 0;
@@ -444,7 +444,7 @@ void l3_textview_draw_window() {
     }
 }
 
-void l3_textview_draw() {
+void l3_textview_draw(void) {
     l3_textview_draw_window();
     l3_textview_draw_status();
 }

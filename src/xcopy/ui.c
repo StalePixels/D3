@@ -56,6 +56,7 @@ void ui_print_msg(xc_err_t err)
 void ui_error(const char *path, xc_err_t err)
 {
     ++errors_seen;
+    XC_NO_SCROLL();
     printf("%s\n", path);
     if (!opt_continue) exit((int)err);
     printf("  ");

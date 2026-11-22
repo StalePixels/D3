@@ -42,7 +42,7 @@ const char *help_text[] = {
 
 };
 
-void exit_with_help() {
+void exit_with_help(void) {
     d3_logo(); printf(" INI\n");
     for(uint8_t help=0;help<8;help++)
         printf("%s\n", help_text[help]);
@@ -79,5 +79,5 @@ int main(int argc, char** argv) {
             if (verbose) printf("KEY \"%s\" not found\n", argv[2]);
         }
     }
-    exit(errno);
+    return errno;
 }

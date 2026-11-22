@@ -10,6 +10,6 @@
 extern unsigned char err_no_memory[];
 extern unsigned char err_missing_filename[];
 
-void less_exit();
+void less_exit(void);
 void less(char *title, unsigned char text_in, uint8_t viewer_mode);
 #endif //D3_LESS_H

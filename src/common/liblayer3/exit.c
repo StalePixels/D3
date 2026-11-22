@@ -7,7 +7,7 @@
 #include <arch/zxn/esxdos.h>
 #include <string.h>
 
-void l3_exit() {
+void l3_exit(void) {
     // disable textmode
     ZXN_NEXTREG(0x6b, 0);                                    // disable tilemap
 

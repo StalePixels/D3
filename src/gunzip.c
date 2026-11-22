@@ -21,6 +21,7 @@ unsigned char fout = 0xff;
 static char out_name[ESX_PATHNAME_MAX + 1];
 
 static unsigned char old_cpu_speed;
+static unsigned char old_scr_ct;
 
 const char *help_text[] = {
         "\nGUNZIP",
@@ -53,6 +54,7 @@ static void gunzip_exit(void)
     if (fin != 0xff) esx_f_close(fin);
 
     ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
+    z80_bpoke(23692, old_scr_ct);
 }
 
 // The output name: FILE.gz gives FILE, FILE.tgz gives FILE.tar
@@ -82,6 +84,7 @@ static void make_out_name(const char *in)
 int main(int argc, char **argv)
 {
     old_cpu_speed = ZXN_READ_REG(REG_TURBO_MODE);
+    old_scr_ct = z80_bpeek(23692);
     ZXN_NEXTREG(REG_TURBO_MODE, 3);
     atexit(gunzip_exit);
 

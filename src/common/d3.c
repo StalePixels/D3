@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include "ula.h"
 
-void d3_logo() {
+void d3_logo(void) {
     zx_cls(_SYSVAR_ATTR_P); printAt(0,0);
     printf(" _    _          ###, ###\n"
            "[_)s [_)eveloper #  #  _#\n"

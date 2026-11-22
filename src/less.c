@@ -87,5 +87,5 @@ int main(int argc, char **argv)
 
     esxdos_f_close(text_in);
 
-    exit(0);
+    return 0;
 }

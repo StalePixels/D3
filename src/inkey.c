@@ -29,13 +29,13 @@ const char *help_text[] = {
 
 };
 
-void help() {
+void help(void) {
     d3_logo(); printf("INKEY");
     for(uint8_t help=0;help<3;help++)
         printf("%s\n", help_text[help]);
 }
 
-int main(int argc, char** argv) {
+int main(void) {
     startup();
 
     help();
@@ -50,5 +50,5 @@ int main(int argc, char** argv) {
 
     }
 
-    exit(0);
+    return 0;
 }

@@ -5,6 +5,6 @@
 #ifndef D3_STARTUP_H
 #define D3_STARTUP_H
 
-void startup();
-void at_exit();
+void startup(void);
+void at_exit(void);
 #endif //D3_STARTUP_H

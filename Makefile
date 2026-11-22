@@ -18,7 +18,7 @@ Z88DK_RUN = docker run --rm --user $(shell id -u):$(shell id -g) -e HOME=/tmp -v
 
 ZOPT ?= --max-allocs-per-node200000
 CC=$(Z88DK_RUN) zcc
-CCFLAGS=+zxn -vn -startup=$(Z88DK_CRT) -clib=sdcc_iy -SO3 $(ZOPT) --opt-code-size -pragma-include:zpragma.inc
+CCFLAGS=+zxn -vn -startup=$(Z88DK_CRT) -clib=sdcc_iy -SO3 $(ZOPT) --opt-code-size --disable-warning=323 -pragma-include:zpragma.inc
 CZFLAGS=-Cz="--clean --fullsize --main-fence 0xC000"
 LDFLAGS=-m -lm
 INCFLAGS=
@@ -85,12 +85,12 @@ incs: dirs
 	echo "\"" >> src/common/build.h
 
 	cat templates/build_ver.h >> src/common/build.h
-	$(CAT) VERSION >> src/common/build.h
+	@tr -d '\r\n' < VERSION >> src/common/build.h
 	echo "\"" >> src/common/build.h
 
 	cat templates/build_bottom.h >> src/common/build.h
 
-	$(CAT) VERSION > $(TMP_DIR)/BANNER
+	@tr -d '\r\n' < VERSION > $(TMP_DIR)/BANNER
 	$(ECHO) " done!" >> $(TMP_DIR)/BANNER
 	$(CAT) $(TMP_DIR)/BANNER | figlet
 

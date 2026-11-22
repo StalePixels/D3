@@ -17,7 +17,6 @@
 #include "xcopy/xcopy.h"
 
 uint8_t opt_hidden;
-uint8_t opt_assume_dir;
 uint8_t opt_continue;
 uint8_t opt_keep_attr;
 uint8_t opt_recurse;
@@ -43,16 +42,15 @@ uint16_t files_copied;
 uint16_t errors_seen;
 
 static unsigned char old_cpu_speed;
+static unsigned char old_scr_ct;
 
 const char *help_text[] = {
         "\nXCOPY",
           "=====",
         "\n Usage",
-        ".XCOPY [-hickeryz] SRC DST",
+        ".XCOPY [-hckeryz] SRC DST",
         "\nSRC: file, directory or pattern",
         "-h copy hidden and system files",
-        "-i new DST is a directory when",
-        "   SRC is more than one file",
         "-c continue after an error",
         "-k copy attributes",
         "-e copy subdirs, even empty",
@@ -87,6 +85,7 @@ static void xcopy_exit(void)
     if (fin != 0xff) esx_f_close(fin);
 
     ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
+    *(volatile unsigned char *)23692 = old_scr_ct;
 }
 
 // Remove a trailing "/" from path, unless it is the root.
@@ -161,6 +160,7 @@ int main(int argc, char **argv)
     static struct esx_stat st;
 
     old_cpu_speed = ZXN_READ_REG(REG_TURBO_MODE);
+    old_scr_ct = *(volatile unsigned char *)23692;
     ZXN_NEXTREG(REG_TURBO_MODE, 3);
     atexit(xcopy_exit);
 
@@ -173,7 +173,6 @@ int main(int argc, char **argv)
             for (p = argv[i] + 1; *p; ++p) {
                 switch (*p | 0x20) {
                     case 'h': opt_hidden = 1; break;
-                    case 'i': opt_assume_dir = 1; break;
                     case 'c': opt_continue = 1; break;
                     case 'k': opt_keep_attr = 1; break;
                     case 'e': opt_recurse = 1; break;
@@ -219,9 +218,8 @@ int main(int argc, char **argv)
             dst_is_file = 1;
         } else if (errno != ESX_ENOENT) {
             exit(errno);
-        } else if (!dst_slash && !(opt_assume_dir && many)) {
-            printf("Is %s a file or a directory (F/D)? ", dst_path);
-            dst_is_file = (ui_ask("fd") == 'f');
+        } else if (!dst_slash && !many) {
+            dst_is_file = 1;                // one file to a new name
         }
 
         // the directory DST is in (the filename part is ignored)

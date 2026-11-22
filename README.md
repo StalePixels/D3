@@ -16,7 +16,7 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .LESS - Less is not more. A plain text pager with extra features, a compliment, not replacement, for MORE  - thanks Marco.
 
-.XCOPY - Copy files and whole directory trees, keeping long file names. The options follow DOS XCOPY.
+.XCOPY - Copy files and whole directory trees, keeping long file names. Spritual sibling of DOS XCOPY.
 
 .GUNZIP - Decompress a gzip file and keep the original. FILE.gz gives FILE, and FILE.tgz gives FILE.tar for .UNTAR.
 
@@ -28,6 +28,7 @@ Notable Changes
 * V 0.4.0         Fourth stable public, with CH8SHOW
 * V 0.4.2         Minor stable public, with INKEY
 * V 0.5.0         Fifth stable public, with LESS
+* V 0.6.0         Sixth stable public, with XCOPY and GUNZIP
 
 
 

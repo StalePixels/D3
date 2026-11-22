@@ -170,6 +170,7 @@ static void fetch(void)
 
     if ((how = dst_prepare(&ent.size)) == XC_DST_SKIP) return;
 
+    XC_NO_SCROLL();
     printf("%s\n", dst_path);
 
     // the blocks of the file go where the listing is

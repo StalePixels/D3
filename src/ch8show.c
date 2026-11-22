@@ -27,7 +27,7 @@ const char *help_text[] = {
 
 };
 
-void exit_with_help() {
+void exit_with_help(void) {
     d3_logo(); printf("CH8SHOW\n");
     for(uint8_t help=0;help<6;help++)
         printf("%s\n", help_text[help]);
@@ -63,5 +63,5 @@ int main(int argc, char **argv)
 
     esxdos_f_close(font_in);
 
-    exit(0);
+    return 0;
 }

@@ -8,7 +8,7 @@
 unsigned char ini_in, ini_out;
 
 char ini_line[512];
-char *ini_key;
-char *ini_value;
+const char *ini_key;
+const char *ini_value;
 uint32_t ini_char;
 uint8_t *errno_filter;

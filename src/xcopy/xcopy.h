@@ -14,6 +14,10 @@
 // Each level of the tree adds at least two characters to a path
 #define XC_DEPTH_MAX        (XC_PATH_MAX / 2)
 
+// Sets the ROM's scroll count (SCR_CT, 23692) to 255, so that the ROM
+// does not stop the output with "scroll?". Used once for each file.
+#define XC_NO_SCROLL()      (*(volatile uint8_t *)23692 = 255)
+
 // What dst_prepare found at dst_path
 #define XC_DST_NEW          0
 #define XC_DST_OLD          1
@@ -30,7 +34,6 @@ typedef uint16_t xc_err_t;
 
 // Options
 extern uint8_t opt_hidden;          // -h
-extern uint8_t opt_assume_dir;      // -i
 extern uint8_t opt_continue;        // -c
 extern uint8_t opt_keep_attr;       // -k
 extern uint8_t opt_recurse;         // -e

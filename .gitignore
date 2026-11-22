@@ -1,2 +1,6 @@
+*.o
+*.tar
+*.bin
 *.DS_Store
 .idea
+scratchpad

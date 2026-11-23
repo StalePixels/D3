@@ -4,8 +4,11 @@
 put @DOTS@/XCOPY.DOT /dot/XCOPY
 mame -hard2 @CARD@
 autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart POKE 23692,7
 autostart .XCOPY -zec "nbn://127.0.0.1:@PORT@/down" "D:/"
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "SCR ";s
 autostart POKE 23692,255:PRINT "AFTER"
 autostart FOR i=0 TO 1 STEP 0:NEXT i
 seconds 40
 screen 38 AFTER
+screen 38 SCR 7

@@ -12,8 +12,8 @@ REPO=$(dirname "$HERE")
 
 die() { echo "run.sh: $*" >&2; exit 2; }
 
-ALL="ini ini-lastline every untar untar-existing ch8show inkey less gunzip
-     xcopy-local xcopy-err crash-detect xcopy-up xcopy-down"
+ALL="ini ini-lastline every untar untar-existing untar-examples untar-filefirst untar-scroll untar-nospace ch8show inkey less less-break gunzip
+     xcopy-local xcopy-scroll xcopy-err crash-detect xcopy-up xcopy-down"
 NAMES=${*:-$ALL}
 for n in $NAMES; do
     [ -f "$HERE/scenarios/$n.scn" ] || die "no scenario called $n"
@@ -32,7 +32,7 @@ fi
 NEED_NET=
 case " $NAMES " in *" xcopy-up "*|*" xcopy-down "*) NEED_NET=1 ;; esac
 NEED_CARDS=
-case " $NAMES " in *" xcopy-"*) NEED_CARDS=1 ;; esac
+case " $NAMES " in *" xcopy-"*|*" untar-nospace "*) NEED_CARDS=1 ;; esac
 
 if [ -n "$NEED_NET" ]; then
     [ -n "$NBN_SERVER" ] || die "NBN_SERVER is not set. Set it to the NBN PersonalServer folder (NBNtools/server), built with npm run build."
@@ -89,6 +89,7 @@ if [ -n "$NEED_CARDS" ]; then
     CARDS=$(python3 "$HERE/tools/cards.py" build "$D3_TEST_IMAGES") || die "cannot build the second SD card images."
     FULL=$(echo "$CARDS" | sed -n 1p)
     EMPTY=$(echo "$CARDS" | sed -n 2p)
+    NOSPACE=$(echo "$CARDS" | sed -n 3p)
 fi
 
 # ---------------------------------------------------------------- server
@@ -118,9 +119,11 @@ run_scn() {
     case $n in
         gunzip)      gzip -n -c "$HERE/data/d3.tar" >"$WORK/D3.TAR.GZ" ;;
         xcopy-local) src=$FULL;  post=card ;;
+        xcopy-scroll) src=$FULL ;;
         xcopy-up)    src=$FULL;  post=up ;;
         xcopy-err)   src=$EMPTY ;;
         xcopy-down)  src=$EMPTY; post=down ;;
+        untar-nospace) src=$NOSPACE ;;
     esac
     if [ -n "$src" ]; then
         card=$D3_TEST_IMAGES/cards/$n.img

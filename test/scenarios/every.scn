@@ -4,17 +4,20 @@ no-network
 mame -nothrottle
 put @DOTS@/EVERY.DOT /dot/EVERY
 autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart POKE 23692,7
 autostart .EVERY 3 job
-autostart POKE 23692,255:PRINT "R1=";REG 127
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "R1=";REG 127;" SCR ";s
+autostart POKE 23692,7
 autostart .EVERY 3 job
-autostart POKE 23692,255:PRINT "R2=";REG 127
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "R2=";REG 127;" SCR ";s
+autostart POKE 23692,7
 autostart .EVERY 3 job
-autostart POKE 23692,255:PRINT "R3=";REG 127
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "R3=";REG 127;" SCR ";s
 autostart POKE 23692,255:PRINT "AFTER"
 autostart FOR i=0 TO 1 STEP 0:NEXT i
 seconds 16
 screen 15 AFTER
-screen 15 R1=0
-screen 15 R2=0
-screen 15 R3=1
+screen 15 R1=0 SCR 7
+screen 15 R2=0 SCR 7
+screen 15 R3=1 SCR 7
 check /SYS/EVERY.CFG @DATA@/every.cfg

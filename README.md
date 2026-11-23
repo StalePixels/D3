@@ -17,6 +17,12 @@ Best taken with https://github.com/StalePixels/SPUI
 .LESS - Less is not more. A plain text pager with extra features, a compliment, not replacement, for MORE  - thanks Marco.
 
 .XCOPY - Copy files and whole directory trees, keeping long file names. Spritual sibling of DOS XCOPY.
+With -z it copies from an NBN server, or to an NBN PersonalServer, which overwrites files of the same name.
+Put quotes around any path with a ":" in it, or the command line ends at the ":".
+To copy a whole SD card to a folder on a PersonalServer, with hidden files and every subdirectory:
+`.XCOPY -zehc "C:/" "nbn://192.168.1.10/backup"`.
+-c carries on past files that cannot be read, such as disk images that NextZXOS has mounted.
+When a copy to a server stops part way, by BREAK or a read error, the server keeps the part of the file it got.
 
 .GUNZIP - Decompress a gzip file and keep the original. FILE.gz gives FILE, and FILE.tgz gives FILE.tar for .UNTAR.
 

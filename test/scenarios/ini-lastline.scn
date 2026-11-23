@@ -1,0 +1,15 @@
+# .INI on a file whose last line has no newline: the key on that line is found,
+# and setting a new key keeps that line.
+no-network
+mame -nothrottle
+put @DOTS@/INI.DOT /dot/INI
+put @DATA@/ini/lines-nonl.ini /TEST.INI
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart .INI /TEST.INI beta
+autostart .INI /TEST.INI gamma third
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 16
+screen 15 AFTER
+screen 15 second
+check /TEST.INI @DATA@/ini/lines-nonl-set.ini

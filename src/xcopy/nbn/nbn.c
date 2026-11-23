@@ -61,6 +61,24 @@ bool NBN_GetBlock(uint16_t blockSize) __z88dk_fastcall {
     return false;
 }
 
+// .XCOPY: send blockSize bytes from nbnBlock, then their checksum. Returns the
+// server's answer: NBN_BLOCK_SUCCESS, or NBN_BLOCK_FAIL to send the block again.
+unsigned char NBN_PutBlock(uint16_t blockSize) __z88dk_fastcall {
+    uint8_t nbnComputed = 0;
+
+    NBN_IntsOff();
+    NBN_PageIn();
+    for(uint16_t nbnByte = 0; nbnByte < blockSize; nbnByte++) {
+        nbnComputed = nbnComputed + nbnBlock[nbnByte];
+        UART_PutCh(nbnBlock[nbnByte]);
+    }
+    NBN_PageOut();
+    NBN_IntsBack();
+
+    UART_PutCh(nbnComputed);
+    return NBN_GetStatus();
+}
+
 bool NBN_CheckVersionByte(bool fatal) __z88dk_fastcall {
     errno = NET_GetUChar();
     bool pass = true;

@@ -7,6 +7,10 @@
 
 #include "util.h"
 
+// .XCOPY: opening and closing the link only, so in the bank (../bank.asm)
+#pragma codeseg PAGE_12
+#pragma constseg PAGE_12
+
 // Frames are counted where the active video line wraps (bit 8 falls back to 0), so the
 // time is real at any CPU speed and with interrupts off. The first wrap can come at once.
 void wait_frames(uint8_t frames) __z88dk_fastcall {

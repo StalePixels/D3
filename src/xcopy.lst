@@ -1,9 +1,13 @@
 xcopy.c
+xcopy/start.c
+xcopy/report.c
 xcopy/path.c
 xcopy/ui.c
 xcopy/copy.c
 xcopy/walk.c
+xcopy/nbnopen.c
 xcopy/nbnwalk.c
+xcopy/nbnput.c
 xcopy/nbnmatch.c
 xcopy/nbn/nbn.c
 xcopy/nbn/nbn_pages.c
@@ -13,4 +17,4 @@ xcopy/nbn/util.c
 xcopy/nbn/messages.asm
 xcopy/xcopy.asm
 xcopy/cmdline.asm
-common/d3.c
+xcopy/bank.asm

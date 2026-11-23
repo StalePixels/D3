@@ -34,7 +34,8 @@ static struct esx_cat_entry resume[XC_DEPTH_MAX];
 static uint16_t src_len[XC_DEPTH_MAX];
 static uint16_t dst_len[XC_DEPTH_MAX];
 
-static const char all[] = "*.*";
+// Every name: the pattern for a whole directory
+const char pattern_all[] = "*.*";
 
 static uint8_t exact_found;
 
@@ -138,14 +139,15 @@ void walk(uint8_t depth)
 {
     uint8_t attr, err, type;
 
-    if (cat_first(src_exact ? all : src_pattern)) {
+    if (cat_first(src_exact ? pattern_all : src_pattern)) {
         do {
             type = cat_entry(&attr);
             if (type == 1) {
                 if (!src_exact || !stricmp(sfn, src_exact)) ui_error(sfn, p3_err(errno));
             } else if (!type && (!src_exact || !stricmp(lfn.filename, src_exact) || !stricmp(sfn, src_exact))) {
                 if (!depth) exact_found = 1;
-                copy_file(sfn, lfn.filename, attr);
+                if (net_put) nbn_put(sfn, lfn.filename, attr);
+                else copy_file(sfn, lfn.filename, attr);
             }
         } while (cat_next());
     }
@@ -154,7 +156,7 @@ void walk(uint8_t depth)
 
     if (!opt_recurse) return;
 
-    if (!cat_first(all)) return;
+    if (!cat_first(pattern_all)) return;
 
     do {
         type = cat_entry(&attr);
@@ -180,18 +182,19 @@ void walk(uint8_t depth)
             continue;
         }
 
-        if ((err = walk_make_dir())) {
+        if ((err = net_put ? nbn_put_dir(lfn.filename) : walk_make_dir())) {
             ui_error(dst_path, err);
         } else {
             walk(depth + 1);
-            if (opt_keep_attr && (err = copy_attr(dst_path, attr))) ui_error(dst_path, err);
+            if (net_put) nbn_put_up();
+            else if (opt_keep_attr && (err = copy_attr(dst_path, attr))) ui_error(dst_path, err);
         }
 
         path_pop(dst_path, dst_len[depth]);
         path_pop(src_path, src_len[depth]);
 
         // carry on in this directory from the saved entry
-        if (!cat_first(all)) return;
+        if (!cat_first(pattern_all)) return;
         memcpy(&catalog.cat[1], &resume[depth], sizeof(struct esx_cat_entry));
         catalog.completed_sz = 1;
 

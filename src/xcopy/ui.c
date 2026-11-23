@@ -2,7 +2,6 @@
 // XCOPY: keys, prompts and error reports
 //
 
-#include <arch/zxn/esxdos.h>
 #include <ctype.h>
 #include <input.h>
 #include <stdio.h>
@@ -10,8 +9,6 @@
 #include <string.h>
 
 #include "xcopy.h"
-
-static char msg[33];
 
 // BREAK (CAPS SHIFT + SPACE) stops the command; the exit cleanup
 // removes a file that is part written
@@ -37,19 +34,6 @@ char ui_ask(const char *keys)
 
     printf("%c\n", c);
     return c;
-}
-
-void ui_print_msg(xc_err_t err)
-{
-    const char *p;
-
-    if (err < 256) {
-        esx_m_geterr(err, msg);
-        printf("%s", msg);
-    } else {
-        for (p = (const char *)err; !(*p & 0x80); ++p) putchar(*p);
-        putchar(*p & 0x7f);
-    }
 }
 
 // Report an error for path. Without -c the command stops with err.

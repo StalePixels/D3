@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/build.h"
+#include "build.h"
 #include "common/d3.h"
 #include "common/startup.h"
 #include "less/less.h"

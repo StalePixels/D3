@@ -21,28 +21,14 @@
 #include "nbn/net.h"
 #include "nbn/nbn.h"
 
-// In the 8K dot part: the main bank is full
+// In the 8K dot part: the main bank keeps its free space for the stack
 #pragma codeseg code_dot
 
 #define NBN_TYPE_DIR        0
 #define NBN_TYPE_FILE       1
 
-// What nbn_exit has to undo
-#define NET_PAGES           0x01
-#define NET_LINK            0x02
-#define NET_UART            0x04
-
-static uint8_t net_state;
-
-// Port 0x153B as it was: the UART selected, and the top bits of its
-// prescaler. The lower 14 bits of the prescaler cannot be read back.
-static uint8_t old_uart_select;
-
-static char default_port[] = "48128";
-static const unsigned long uart_clock[] = { CLK_28_0, CLK_28_1, CLK_28_2, CLK_28_3, CLK_28_4, CLK_28_5, CLK_28_6, CLK_28_7 };
-
 // The directory now listed, and the page of it in nbnBlock (0: none)
-static nbnDirectory_t dir;
+static nbnDirectory_t dir = { nbnBuff };
 static uint16_t dir_page;
 
 // One listing entry, copied out of nbnBlock
@@ -54,16 +40,10 @@ static struct {
 
 static uint8_t exact_found;
 
-static const char all[] = "*.*";
-
-uint8_t nbn_is_url(const char *s)
-{
-    return strnicmp(s, "nbn://", 6) == 0;
-}
-
 // Runs first in the exit cleanup, also after an error with the NBN pages
-// in. The flags are cleared first: a timeout in NET_Close calls exit
-// again, and the cleanup runs again from the start.
+// in, and with the home page at $C000 for NBN_Free. The flags are cleared
+// first: a timeout in NET_Close calls exit again, and the cleanup runs
+// again from the start.
 void nbn_exit(void)
 {
     uint8_t state = net_state;
@@ -75,8 +55,7 @@ void nbn_exit(void)
     intrinsic_ei();
 
     if (state & NET_PAGES) NBN_Free();
-    if (state & NET_LINK) NET_Close(true);
-    if (state & NET_UART) IO_UART_CONTROL = (old_uart_select & 0x47) | 0x10;
+    nbn_close(state);
 }
 
 static void send_status(char c)
@@ -87,7 +66,7 @@ static void send_status(char c)
 
 // Change the server's directory to path.
 // Returns 0, or an error for the path.
-static xc_err_t cd(char *path)
+xc_err_t nbn_cd(char *path)
 {
     // "CD path" and LF CR must fit in the 255 bytes UART_Send takes, and
     // in the server's 256-byte line
@@ -232,98 +211,6 @@ static void fetch(void)
     copy_frag_check();
 }
 
-// Connect to host:port and open the NBN session
-static void connect(char *host, char *port)
-{
-    unsigned int prescalar;
-
-    if (!NBN_Malloc()) {
-        net_state = NET_PAGES;
-        exit((int)err_no_memory);
-    }
-    net_state = NET_PAGES;
-
-    // The ESP UART, at 115,200 baud at the clock of this video timing.
-    // Bit 4 writes the top 3 bits of the prescaler, all 0 for this rate.
-    old_uart_select = IO_UART_CONTROL;
-    net_state |= NET_UART;
-    IO_UART_CONTROL = 0x10;
-    prescalar = uart_clock[ZXN_READ_REG(REG_VIDEO_TIMING) & 7] / 115200UL;
-    IO_UART_BAUD_RATE = prescalar & 0x7f;
-    IO_UART_BAUD_RATE = ((prescalar >> 7) & 0x7f) | 0x80;
-
-    // an ESP still in passthrough answers with an error, so close it
-    if (NET_GetOK(false)) NET_Close(true);
-
-    printf("Connecting to %s\n", host);
-    net_state |= NET_LINK;
-    NET_Connect(host, port);
-    if (UART_WaitOK(false)) exit((int)err_failed_connection);
-
-    NET_ModeSingle();
-    NET_OpenSocket();
-
-    // the ">" prompt of CIPSEND
-    for (prescalar = 255; NET_GetUChar() != '>'; )
-        if (!--prescalar) exit((int)err_failed_connection);
-}
-
-// Take the source URL nbn://host[:port]/path, connect, and find what to
-// copy: a directory, a pattern in a directory, or one name in it.
-// Leaves the server in the directory, and its path in src_path.
-// Returns 1 if the source can be more than one file.
-uint8_t nbn_open(char *url)
-{
-    char *host = url + 6;
-    char *port = default_port;
-    char *p, *base;
-    uint32_t n = 0;
-    xc_err_t err;
-
-    for (p = host; *p && *p != ':' && *p != '/'; ++p) ;
-    if (p == host) exit((int)err_bad_server);
-
-    if (*p == ':') {
-        *p++ = 0;
-        port = p;
-        for (; isdigit(*p) && n <= 65535; ++p) n = n * 10 + (*p - '0');
-        if (p == port || !n || n > 65535 || (*p && *p != '/')) exit((int)err_bad_port);
-    }
-
-    if (strlen(p) > XC_PATH_MAX) exit(ESX_ENAMETOOLONG);
-    strcpy(src_path, *p ? p : "/");
-    *p = 0;                                 // ends the host or the port
-
-    p = src_path + strlen(src_path) - 1;
-    if (p != src_path && *p == '/') *p = 0;
-
-    dir.currentPath = nbnBuff;
-    connect(host, port);
-
-    base = (char *)path_basename(src_path);
-
-    if (!strpbrk(base, "*?") && !cd(src_path)) {
-        src_pattern = all;
-        return 1;
-    }
-
-    strcpy(src_name, base);
-    *base = 0;
-    if (base - 1 != src_path) base[-1] = 0;     // "/dir/name" to "/dir", "/name" to "/"
-
-    if ((err = cd(src_path))) {
-        printf("%s\n", src_path);
-        exit((int)err);
-    }
-
-    if (strpbrk(src_name, "*?")) {
-        src_pattern = src_name;
-        return 1;
-    }
-    src_exact = src_name;
-    return 0;
-}
-
 // Copy the files in the server's directory src_path that match, then
 // (with -e) each subdirectory, to dst_path
 void nbn_walk(uint8_t depth)
@@ -386,7 +273,7 @@ void nbn_walk(uint8_t depth)
 
             if ((err = walk_make_dir())) {
                 ui_error(dst_path, err);
-            } else if ((err = cd(src_path))) {
+            } else if ((err = nbn_cd(src_path))) {
                 ui_error(src_path, err);
             } else {
                 nbn_walk(depth + 1);
@@ -396,7 +283,7 @@ void nbn_walk(uint8_t depth)
             path_pop(src_path, src_len);
 
             // back to this directory; get_entry lists the page again
-            if (cd(src_path)) NBN_Fail(err_nbn_protocol);
+            if (nbn_cd(src_path)) NBN_Fail(err_nbn_protocol);
         }
         if (page >= dir.totalPages) break;
     }

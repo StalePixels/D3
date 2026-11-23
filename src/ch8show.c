@@ -1,5 +1,3 @@
-#pragma define CLIB_EXIT_STACK_SIZE = 1
-
 #include <z80.h>
 #include <arch/zxn.h>
 #include <intrinsic.h>
@@ -10,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/build.h"
+#include "build.h"
 #include "common/d3.h"
 #include "common/startup.h"
 #include "ch8/ch8show.h"

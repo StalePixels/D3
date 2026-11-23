@@ -8,6 +8,10 @@
 #include "messages.h"
 #include <string.h>
 
+// .XCOPY: opening and closing the link only, so in the bank (../bank.asm)
+#pragma codeseg PAGE_12
+#pragma constseg PAGE_12
+
 int NET_Command(char command[], uint8_t len) {
     uint8_t command_letter = 0;
 

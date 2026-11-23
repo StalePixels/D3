@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/build.h"
+#include "build.h"
 #include "common/d3.h"
 #include "common/startup.h"
 
@@ -36,6 +36,8 @@ void exit_with_help(void) {
 int main(int argc, char **argv)
 {
     startup();
+    // No "scroll?" from the first line of output on
+    z80_bpoke(23692, 255);
 
     // One arg, minimum
     if(argc < 2) exit_with_help();
@@ -47,8 +49,8 @@ int main(int argc, char **argv)
         exit(errno);
     }
     else {
+        // untar_exit closes tar_in
         untar(tar_in, argv[1]);
-        esxdos_f_close(tar_in);
     }
 
     return errno;

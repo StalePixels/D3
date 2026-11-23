@@ -1,9 +1,7 @@
 //
-// XCOPY: bounded path building and canonical paths
+// XCOPY: bounded path building
 //
 
-#include <arch/zxn/esxdos.h>
-#include <errno.h>
 #include <string.h>
 
 #include "xcopy.h"
@@ -38,30 +36,4 @@ const char *path_basename(const char *path)
         if ((*path == '/') || (*path == ':')) base = path + 1;
 
     return base;
-}
-
-// Canonical form of directory dir in out: drive, 8.3 names in upper
-// case and a trailing "/", whatever spelling dir uses (long or short
-// names, any case, relative, "..").
-// Returns 0, or an esxDOS error code.
-uint8_t path_canonical(char *dir, char *out)
-{
-    uint16_t len = path_push(dir, "X");
-
-    if (len == 0xffff) return ESX_ENAMETOOLONG;
-
-    errno = 0;
-    out[0] = 0;
-    esx_f_get_canonical_path(dir, out);
-    path_pop(dir, len);
-
-    if (errno) return errno;
-    if ((out[1] != ':') || (out[2] != '/')) return ESX_ENOTDIR;
-    return 0;
-}
-
-// Is canonical directory inner the same as, or below, canonical outer?
-uint8_t path_inside(const char *inner, const char *outer)
-{
-    return strnicmp(inner, outer, strlen(outer)) == 0;
 }

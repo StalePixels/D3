@@ -2,8 +2,6 @@
 // Created by D Rimron-Soutter on 18/11/2020.
 //
 
-#pragma define CLIB_EXIT_STACK_SIZE = 1
-
 #include <z80.h>
 #include <arch/zxn.h>
 #include <intrinsic.h>
@@ -15,7 +13,7 @@
 #include <string.h>
 #include <input.h>
 
-#include "common/build.h"
+#include "build.h"
 #include "common/d3.h"
 #include "common/startup.h"
 #include "common/ula.h"

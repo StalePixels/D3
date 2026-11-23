@@ -1,6 +1,5 @@
 //
-// XCOPY: match a long name on an NBN server against a pattern (-z).
-// In the main bank: the 8K dot part has no room for it.
+// XCOPY: match a long name on an NBN server against a pattern (-z)
 //
 
 #include <ctype.h>

@@ -1,4 +1,5 @@
-SECTION rodata_user
+; .XCOPY: in the bank, as ../xcopy.asm
+SECTION PAGE_12
 
 PUBLIC _err_at_protocol
 PUBLIC _err_timeout_byte

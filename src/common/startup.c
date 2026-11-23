@@ -22,6 +22,7 @@ void at_exit(void) {
     ZXN_NEXTREGA(REG_TURBO_MODE, old_cpu_speed);
     // Restore the ROM scroll count (SCR_CT)
     z80_bpoke(23692, old_scr_ct);
+    // LESS runs with interrupts off (src/less/less.c)
     intrinsic_ei();
 }
 
@@ -35,5 +36,4 @@ void startup(void) {
     // Restore to original atexit
     atexit(at_exit);
     errno = 0;
-    intrinsic_di();
 }

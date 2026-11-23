@@ -9,81 +9,8 @@
 
 #include "xcopy.h"
 
-static unsigned char buffer[2048];
+unsigned char copy_buffer[2048];
 static struct esx_stat st;
-
-// Copies with these extensions must be unfragmented (mounted disk images
-// and swap files), so they are checked after the copy
-static const char *const frag_ext[] = { "P3D", "DSK", "P3S" };
-
-// DISK_FILEMAP (xcopy.asm); the map goes in buffer
-unsigned char fm_handle;
-void *fm_buf;
-unsigned char *fm_end;
-uint8_t fm_flags;
-extern uint8_t fm_filemap(void);
-
-// IDE_DOS_MAPPING (xcopy.asm) for drive dm_drive; the description goes
-// in dm_buf, ended by 0xff
-unsigned char dm_drive;
-void *dm_buf;
-extern uint8_t dm_mapping(void);
-
-uint16_t files_fragmented;
-uint16_t files_skipped;
-
-static uint8_t needs_frag_check(const char *name)
-{
-    const char *ext = strrchr(name, '.');
-    uint8_t i;
-
-    if (!ext) return 0;
-    for (i = 0; i != sizeof(frag_ext) / sizeof(frag_ext[0]); ++i)
-        if (!stricmp(ext + 1, frag_ext[i])) return 1;
-    return 0;
-}
-
-// Is the file at path fragmented? As .DEFRAG checks it: the file is
-// in one piece if each DISK_FILEMAP entry starts where the one before
-// ends. Each entry covers at most about 32 MB, so a file under that size
-// is in one piece only with a single entry.
-static uint8_t is_fragmented(const char *path)
-{
-    unsigned char *e;
-    uint32_t next, addr;
-    uint16_t count;
-    uint8_t frag = 0;
-
-    errno = 0;
-    fin = esx_f_open(path, ESX_MODE_R | ESX_MODE_OPEN_EXIST);
-    if (errno) {
-        fin = 0xff;
-        return 0;
-    }
-
-    // the API asks for a seek to the start and a one byte read first
-    esx_f_seek(fin, 0, ESX_SEEK_SET);
-    esx_f_read(fin, buffer, 1);
-
-    fm_handle = fin;
-    fm_buf = buffer;
-    if (!fm_filemap()) {
-        for (e = buffer; e + 6 < fm_end; e += 6) {
-            memcpy(&addr, e, 4);
-            memcpy(&count, e + 4, 2);
-            next = addr + ((fm_flags & 0x02) ? (uint32_t)count : (uint32_t)count * 512);
-            memcpy(&addr, e + 6, 4);
-            if (addr != next) {
-                frag = 1;
-                break;
-            }
-        }
-    }
-
-    esx_f_close(fin);
-    fin = 0xff;
-    return frag;
-}
 
 // Give path the MS-DOS attributes in attr: read-only, archive, and
 // hidden plus system. In F_CHMOD bit 0 means writable, the opposite of
@@ -97,16 +24,6 @@ uint8_t copy_attr(const char *path, uint8_t attr)
     if (!errno) esx_f_chmod(path, XC_A_ARCH, attr & XC_A_ARCH);
     if (!errno) esx_f_chmod(path, 0x01, (attr & XC_A_RDONLY) ? 0x00 : 0x01);
     return errno;
-}
-
-// After a copy to dst_path: warn if it must be in one piece and is not,
-// unless the source file on a drive was not in one piece either
-void copy_frag_check(void)
-{
-    if (needs_frag_check(path_basename(dst_path)) && is_fragmented(dst_path) && (opt_net || !is_fragmented(src_path))) {
-        ++files_fragmented;
-        printf("%s is fragmented: run .DEFRAG on it\n", dst_path);
-    }
 }
 
 // Get dst_path ready to be written. A read-only file needs -r, and
@@ -159,56 +76,26 @@ static void copy_close(uint8_t remove)
     }
 }
 
-// The drive on which NextZXOS has mounted the file src_path (8.3 name
-// sfn, long name lfn) as a disk image, or 0. IDE_DOS_MAPPING describes
-// such a drive as "Mount=" and the path the image was mounted with, as
-// it was given: only a path with a drive letter is compared. A drive
-// mounted at startup names the file as an 8.3 directory entry, such as
-// "DRV-B   P3D".
-static char mounted_drive(const char *sfn, const char *lfn)
+// Open src_path (8.3 name sfn, long name lfn) as fin.
+// Returns 0, or an error for src_path: err_mounted for a disk image that
+// NextZXOS has mounted.
+xc_err_t copy_open_src(const char *sfn, const char *lfn)
 {
-    unsigned char *desc = buffer;
-    char *canon = (char *)buffer + 256;
-    char *src_dir = canon + 256;
-    char *name = src_dir + 256;
-    char *p, *q;
-    uint8_t i;
-    char d;
+    const char *names[2];
+    xc_err_t err;
 
     errno = 0;
-    src_dir[0] = 0;
-    esx_f_get_canonical_path(src_path, src_dir);
-    if (errno) return 0;
+    fin = esx_f_open(src_path, ESX_MODE_R | ESX_MODE_OPEN_EXIST);
+    if (!errno) return 0;
 
-    dm_buf = desc;
-    for (d = 'A'; d <= 'P'; ++d) {
-        dm_drive = d;
-        desc[256] = 0xff;
-        if (dm_mapping() != 0xff) continue;
-
-        for (p = (char *)desc; *(unsigned char *)p != 0xff; ++p) ;
-        *p = 0;
-        p = (char *)desc + 6;
-        if (desc[5] != '=' || p[1] != ':') continue;
-
-        errno = 0;
-        canon[0] = 0;
-        esx_f_get_canonical_path(p, canon);
-        if (errno || stricmp(canon, src_dir)) continue;
-
-        p = (char *)path_basename(p);
-        if (!stricmp(p, sfn) || !stricmp(p, lfn)) return d;
-
-        if (strlen(p) == 11 && !strchr(p, '.')) {
-            for (q = name, i = 0; i != 11; ++i) {
-                if (i == 8) *q++ = '.';
-                if (p[i] != ' ') *q++ = p[i];
-            }
-            *q = 0;
-            if (!stricmp(name, sfn)) return d;
-        }
+    fin = 0xff;
+    err = errno;
+    if (err == ESX_EACCES) {
+        names[0] = sfn;
+        names[1] = lfn;
+        if ((err_mounted_drive[0] = mounted_drive(names))) err = (xc_err_t)err_mounted;
     }
-    return 0;
+    return err;
 }
 
 // Copy src_path/sfn, with attributes attr, to dst_path/lfn, or to
@@ -244,16 +131,12 @@ void copy_file(const char *sfn, const char *lfn, uint8_t attr)
     XC_NO_SCROLL();
     printf("%s\n", dst_path);
 
-    errno = 0;
-    fin = esx_f_open(src_path, ESX_MODE_R | ESX_MODE_OPEN_EXIST);
-    if (errno) {
-        fin = 0xff;
-        err = errno;
-        if (err == ESX_EACCES && (err_mounted_drive[0] = mounted_drive(sfn, lfn))) err = (xc_err_t)err_mounted;
+    if ((err = copy_open_src(sfn, lfn))) {
         ui_error(src_path, err);
         goto done;
     }
 
+    errno = 0;
     fout = esx_f_open(dst_path, ESX_MODE_W | (exists == XC_DST_OLD ? ESX_MODE_OPEN_CREAT_TRUNC : ESX_MODE_OPEN_CREAT_NOEXIST));
     if (errno) {
         err = errno;
@@ -267,11 +150,11 @@ void copy_file(const char *sfn, const char *lfn, uint8_t attr)
         ui_check_break();
 
         errno = 0;
-        n = esx_f_read(fin, buffer, sizeof(buffer));
+        n = esx_f_read(fin, copy_buffer, sizeof(copy_buffer));
         if (errno) break;
         if (!n) break;
 
-        if (esx_f_write(fout, buffer, n) != n) {
+        if (esx_f_write(fout, copy_buffer, n) != n) {
             // a short write with no error code is a full drive
             if (!errno) errno = ESX_ENOSPC;
             break;

@@ -86,6 +86,7 @@ unsigned char NBN_GetStatus(void);
 
 // THIS DOES ULA MEMORY PAGING, DO NOT RUN WITH INTERRUPTS ENABLED - JUST IN CASE!
 bool NBN_GetBlock(uint16_t blockSize) __z88dk_fastcall;
+unsigned char NBN_PutBlock(uint16_t blockSize) __z88dk_fastcall;
 
 
 

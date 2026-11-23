@@ -1,6 +1,8 @@
-; XCOPY: custom BASIC error messages, last character with bit 7 set
+; XCOPY: custom BASIC error messages, last character with bit 7 set.
+; In the bank (bank.asm): the exit cleanup pages it in for the CRT, which
+; copies the message.
 
-SECTION rodata_user
+SECTION PAGE_12
 
 PUBLIC _err_break
 PUBLIC _err_self_copy
@@ -8,6 +10,7 @@ PUBLIC _err_dst_in_src
 PUBLIC _err_invalid_option
 PUBLIC _err_need_z
 PUBLIC _err_need_url
+PUBLIC _err_two_urls
 PUBLIC _err_no_memory
 PUBLIC _err_line_too_long
 
@@ -29,11 +32,15 @@ _err_invalid_option:
 
 _err_need_z:
 
-   defm "Use -z for nbn:// source", 's' + 0x80
+   defm "Use -z for nbn:// path", 's' + 0x80
 
 _err_need_url:
 
    defm "-z needs nbn://host/pat", 'h' + 0x80
+
+_err_two_urls:
+
+   defm "SRC and DST both nbn:/", '/' + 0x80
 
 _err_no_memory:
 

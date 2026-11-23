@@ -14,12 +14,20 @@
 #include <string.h>
 
 void create_dir(char *pathname) {
-    char *p;
+    char *end, *p;
+    char saved;
     int r;
 
-    /* Strip trailing '/' */
-    if (pathname[strlen(pathname) - 1] == '/')
-        pathname[strlen(pathname) - 1] = '\0';
+    /* Leave out trailing '/' and "." entries: "./" is the current
+       directory, and "a/./" is "a". */
+    end = pathname + strlen(pathname);
+    while (end > pathname && (end[-1] == '/' ||
+           (end[-1] == '.' && (end - 1 == pathname || end[-2] == '/'))))
+        --end;
+    if (end == pathname)
+        return;         // the current directory: nothing to make
+    saved = *end;
+    *end = '\0';
 
     /* Try creating the directory. */
     r = esx_f_mkdir(pathname);
@@ -27,6 +35,7 @@ void create_dir(char *pathname) {
     // An existing directory is not an error
     if(errno==18) {
         errno = 0;
+        *end = saved;
         return;
     }
     if (r != 0) {
@@ -43,4 +52,5 @@ void create_dir(char *pathname) {
         printf("Could not create directory %s\n", pathname);
     else
         errno = 0;      // a failed first try left its error code
+    *end = saved;
 }

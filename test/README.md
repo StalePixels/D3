@@ -18,11 +18,11 @@ Every scenario boots NextZXOS from a clone of the harness's SD image, as a real 
 |---|---|
 | `PINESY_HARNESS` | The pinesy-harness folder, the one that holds `run.py`. |
 | `D3_TEST_IMAGES` | A folder for the second SD card images, the harness's disk images and the run logs. Use a folder that backups and indexing skip: the images are tens of megabytes. |
-| `NBN_SERVER` | The NBN PersonalServer folder (`NBNtools/server`), built with `npm install` and `npm run build`. Needed only when `xcopy-up` or `xcopy-down` runs. |
+| `NBN_SERVER` | The NBN PersonalServer folder (`NBNtools/server`), built with `npm install` and `npm run build`. Needed only by the scenarios that use the server. |
 | `MAME` | Optional. The Pinesy binary. Without it the harness uses the Pinesy binary of the host. |
 | `D3_DOT_DIR` | Optional. A folder with `INI.DOT`, `EVERY.DOT` and the other commands to test, in place of `DEV-D3`. With it set, `run.sh` does not run `make all`. |
 
-The tools it calls: `make` and Docker (for `make all`), `python3`, `gzip`, `txt2bas`, `timeout`, `mtools` and `mkfs.vfat` for the scenarios with a second SD card, and `node`, `npm` and `lsof` for `xcopy-up` and `xcopy-down`.
+The tools it calls: `make` and Docker (for `make all`), `python3`, `gzip`, `txt2bas`, `timeout`, `mtools` and `mkfs.vfat` for the scenarios with a second SD card, and `node`, `npm` and `lsof` for the scenarios that use the server.
 
 Run logs of the last run are in `$D3_TEST_IMAGES/runs/<scenario>/`. A scenario that fails keeps its disk image until the scenario runs again.
 
@@ -50,12 +50,16 @@ Each command runs with the ROM's scroll count (SCR_CT, 23692) set to 7, and the 
 | `gunzip` | `.GUNZIP` on a file that `gzip` made on the Mac gives the original, byte for byte. |
 | `xcopy-local` | `.XCOPY` copies the second SD card (D:) to a folder on the boot card. Every file without a space in its path matches the fixture, and D: is unchanged. |
 | `xcopy-scroll` | `.XCOPY -ehc` copies D: to the boot card, with the screen full and SCR_CT at 1. Its lines never stop at `scroll?`, and it returns to BASIC with SCR_CT at 1. |
+| `xcopy-progress` | `.XCOPY` copies a file of 70001 bytes from D: to the boot card. The count after the file's name redraws in place and ends as `68K/68K`, and the copy matches the fixture. |
+| `xcopy-progress-mb` | `.XCOPY` copies a file of 1500000 bytes from D: to the boot card. The count goes from K to M, where `1022K/1.4M` becomes the shorter `1.0M/1.4M`, and ends as `1.4M/1.4M`. The line after the command reads the count's row back with `SCREEN$` and prints it in brackets, so a character left over from a longer count shows before the `]`. |
 | `xcopy-err` | `.XCOPY` with an option it does not have returns error 255, and the line after it does not run. |
 | `crash-detect` | A program that resets the machine fails its scenario. The scenario passes when the run fails. |
 | `xcopy-up` | `.XCOPY` copies the whole second SD card to a PersonalServer folder. The folder equals the fixture, and D: is unchanged. |
 | `xcopy-down` | `.XCOPY` copies a PersonalServer folder to the empty second SD card. The card equals the fixture. |
+| `xcopy-progress-up` | `.XCOPY` copies a file of 70001 bytes from D: to a PersonalServer folder. The count ends as `68K/68K`. |
+| `xcopy-progress-down` | `.XCOPY` copies a file of 70001 bytes from a PersonalServer folder to the empty second SD card. The count ends as `68K/68K`. |
 
-`xcopy-up` and `xcopy-down` use one PersonalServer that `run.sh` starts on a free port of `127.0.0.1`, and run at the same time. They run at real speed, because Next network software and its server are built around the Next's clock. The other scenarios have no network and run with `-nothrottle`.
+`xcopy-up`, `xcopy-down`, `xcopy-progress-up` and `xcopy-progress-down` use one PersonalServer that `run.sh` starts on a free port of `127.0.0.1`, and run at the same time. They run at real speed, because Next network software and its server are built around the Next's clock. The other scenarios have no network and run with `-nothrottle`.
 
 ## Test data
 
@@ -68,6 +72,6 @@ Each command runs with the ROM's scroll count (SCR_CT, 23692) set to 7, and the 
 
 ## The second SD card
 
-The XCOPY scenarios and `untar-nospace` put a second card on `-hard2`. `tools/cards.py` builds 64 MiB cards in `$D3_TEST_IMAGES/xcopy-cards/`: one with the fixture on it, one empty, and one with a single file, `FILLER.BIN`, that leaves 512 KiB free. It builds them when they are missing, and again when the fixture changes. Each run clones the card with `cp -c`, and deletes the clone when the scenario passes. The card is an MBR with one FAT32 partition, as the boot card is, and `cards.py` checks that the full card reads back as the fixture before it uses it.
+The XCOPY scenarios and `untar-nospace` put a second card on `-hard2`. `tools/cards.py` builds 64 MiB cards in `$D3_TEST_IMAGES/xcopy-cards/`: one with the fixture on it, one empty, one with a single file, `FILLER.BIN`, that leaves 512 KiB free, and one with a single file, `BIG.BIN`, of 1500000 bytes. It builds them when they are missing, and again when the fixture changes. Each run clones the card with `cp -c`, and deletes the clone when the scenario passes. The card is an MBR with one FAT32 partition, as the boot card is, and `cards.py` checks that the full card reads back as the fixture before it uses it.
 
 `cards.py` also lists the differences between two folders. The XCOPY scenarios use it to compare a server folder or a card with the fixture.

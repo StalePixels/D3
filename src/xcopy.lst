@@ -3,6 +3,7 @@ xcopy/start.c
 xcopy/report.c
 xcopy/path.c
 xcopy/ui.c
+xcopy/progress.c
 xcopy/copy.c
 xcopy/walk.c
 xcopy/nbnopen.c

@@ -116,7 +116,7 @@ void nbn_put(const char *sfn, char *lfn, uint8_t attr)
     }
 
     XC_NO_SCROLL();
-    printf("%s\n", dst_path);
+    progress_path();
 
     // a disk image that NextZXOS has mounted fails here, before the PUT
     if ((err = copy_open_src(sfn, lfn))) {
@@ -152,10 +152,12 @@ void nbn_put(const char *sfn, char *lfn, uint8_t attr)
     // Full blocks of 4096 bytes, then one with the rest, which can be
     // empty. The server has the file open now, and cannot be told to
     // stop: a read error ends the command.
+    progress_start(st.size);
     for (blocks = st.size >> 12; ; --blocks) {
         ui_check_break();
         len = blocks ? NBN_MAX_BLOCKSIZE : (uint16_t)st.size & (NBN_MAX_BLOCKSIZE - 1);
         if ((err = read_block(len))) {
+            progress_end();
             XC_NO_SCROLL();
             printf("%s\n", src_path);
             exit((int)err);
@@ -165,12 +167,14 @@ void nbn_put(const char *sfn, char *lfn, uint8_t attr)
         // three resends, and ends the session on a fourth bad checksum
         for (tries = 4; NBN_PutBlock(len) != NBN_BLOCK_SUCCESS; )
             if (!--tries) NBN_Fail(err_transfer_error);
+        progress_add(len);
 
         if (!blocks) break;
     }
 
     esx_f_close(fin);
     fin = 0xff;
+    progress_end();
     ++files_copied;
 
 done:

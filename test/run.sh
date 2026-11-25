@@ -13,7 +13,10 @@ REPO=$(dirname "$HERE")
 die() { echo "run.sh: $*" >&2; exit 2; }
 
 ALL="ini ini-lastline every untar untar-existing untar-examples untar-filefirst untar-scroll untar-nospace ch8show inkey less less-break gunzip
-     xcopy-local xcopy-scroll xcopy-err crash-detect xcopy-up xcopy-down"
+     xcopy-local xcopy-scroll xcopy-progress xcopy-progress-mb xcopy-err crash-detect
+     xcopy-up xcopy-down xcopy-progress-up xcopy-progress-down"
+# The scenarios that use the NBN server. They run at the same time, at real speed.
+NET="xcopy-up xcopy-down xcopy-progress-up xcopy-progress-down"
 NAMES=${*:-$ALL}
 for n in $NAMES; do
     [ -f "$HERE/scenarios/$n.scn" ] || die "no scenario called $n"
@@ -30,7 +33,9 @@ if [ -n "$MAME" ]; then
 fi
 
 NEED_NET=
-case " $NAMES " in *" xcopy-up "*|*" xcopy-down "*) NEED_NET=1 ;; esac
+for n in $NAMES; do
+    case " $NET " in *" $n "*) NEED_NET=1 ;; esac
+done
 NEED_CARDS=
 case " $NAMES " in *" xcopy-"*|*" untar-nospace "*) NEED_CARDS=1 ;; esac
 
@@ -90,6 +95,7 @@ if [ -n "$NEED_CARDS" ]; then
     FULL=$(echo "$CARDS" | sed -n 1p)
     EMPTY=$(echo "$CARDS" | sed -n 2p)
     NOSPACE=$(echo "$CARDS" | sed -n 3p)
+    BIG=$(echo "$CARDS" | sed -n 4p)
 fi
 
 # ---------------------------------------------------------------- server
@@ -120,6 +126,10 @@ run_scn() {
         gunzip)      gzip -n -c "$HERE/data/d3.tar" >"$WORK/D3.TAR.GZ" ;;
         xcopy-local) src=$FULL;  post=card ;;
         xcopy-scroll) src=$FULL ;;
+        xcopy-progress) src=$FULL ;;
+        xcopy-progress-mb) src=$BIG ;;
+        xcopy-progress-up) src=$FULL ;;
+        xcopy-progress-down) src=$EMPTY ;;
         xcopy-up)    src=$FULL;  post=up ;;
         xcopy-err)   src=$EMPTY ;;
         xcopy-down)  src=$EMPTY; post=down ;;
@@ -197,23 +207,21 @@ report() {
 # ---------------------------------------------------------------- run
 
 FAILED=
-PAIR=
-case " $NAMES " in *" xcopy-up "*) case " $NAMES " in *" xcopy-down "*) PAIR=1 ;; esac ;; esac
+NETRUN=
 for n in $NAMES; do
-    case $n in
-        xcopy-up|xcopy-down) [ -n "$PAIR" ] && continue ;;
-    esac
+    case " $NET " in *" $n "*) NETRUN="$NETRUN $n"; continue ;; esac
     run_scn "$n"
     report "$n"
 done
-if [ -n "$PAIR" ]; then
-    # Both read and write their own folders of the one server, and run at real speed.
-    run_scn xcopy-up &
-    UP_PID=$!
-    run_scn xcopy-down &
-    wait "$UP_PID" $!
-    report xcopy-up
-    report xcopy-down
+if [ -n "$NETRUN" ]; then
+    # Each reads and writes its own folders of the one server, and runs at real speed.
+    PIDS=
+    for n in $NETRUN; do
+        run_scn "$n" &
+        PIDS="$PIDS $!"
+    done
+    wait $PIDS
+    for n in $NETRUN; do report "$n"; done
 fi
 
 echo "Total wall time: ${SECONDS} s"

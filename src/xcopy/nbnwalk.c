@@ -150,7 +150,7 @@ static void fetch(void)
     if ((how = dst_prepare(&ent.size)) == XC_DST_SKIP) return;
 
     XC_NO_SCROLL();
-    printf("%s\n", dst_path);
+    progress_path();
 
     // the blocks of the file go where the listing is
     dir_page = 0;
@@ -180,12 +180,14 @@ static void fetch(void)
 
     // "!" asks for each block, and after the last one ends the GET.
     // After an open or write error the rest is read and dropped.
+    progress_start(size);
     for (;;) {
         ui_check_break();
         send_status(NBN_BLOCK_SUCCESS);
         len = blocks ? NBN_MAX_BLOCKSIZE : remainder;
         get_block(len);
         if (!err && len) err = write_block(len);
+        progress_add(len);
         if (!blocks) break;
         --blocks;
     }
@@ -207,6 +209,7 @@ static void fetch(void)
     }
     fout = 0xff;
 
+    progress_end();
     ++files_copied;
     copy_frag_check();
 }

@@ -129,9 +129,18 @@ void copy_file(const char *sfn, const char *lfn, uint8_t attr)
     if ((exists = dst_prepare(0)) == XC_DST_SKIP) goto done;
 
     XC_NO_SCROLL();
-    printf("%s\n", dst_path);
+    progress_path();
 
     if ((err = copy_open_src(sfn, lfn))) {
+        ui_error(src_path, err);
+        goto done;
+    }
+
+    // dst_prepare is done with st: it takes the size of the source now
+    errno = 0;
+    if (esx_f_fstat(fin, &st)) {
+        err = errno;
+        copy_close(0);
         ui_error(src_path, err);
         goto done;
     }
@@ -146,6 +155,7 @@ void copy_file(const char *sfn, const char *lfn, uint8_t attr)
         goto done;
     }
 
+    progress_start(st.size);
     for (;;) {
         ui_check_break();
 
@@ -159,6 +169,7 @@ void copy_file(const char *sfn, const char *lfn, uint8_t attr)
             if (!errno) errno = ESX_ENOSPC;
             break;
         }
+        progress_add(n);
     }
 
     if (!errno) {
@@ -181,6 +192,7 @@ void copy_file(const char *sfn, const char *lfn, uint8_t attr)
         goto done;
     }
 
+    progress_end();
     ++files_copied;
     copy_frag_check();
 

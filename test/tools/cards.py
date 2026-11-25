@@ -2,9 +2,9 @@
 """Second SD card and fixture tools for the XCOPY scenarios.
 
 usage:
-  cards.py build IMAGES_DIR          make the full, empty and no-space cards when
-                                     missing, print their three paths (full, empty,
-                                     no-space)
+  cards.py build IMAGES_DIR          make the full, empty, no-space and big cards when
+                                     missing, print their paths, one to a line, in
+                                     that order
   cards.py materialise OUT           copy the fixture to OUT, with its empty folders
   cards.py extract IMAGE OUT         copy the files of a card to OUT
   cards.py compare EXPECTED ACTUAL   list every difference; exit 1 when there is one
@@ -12,7 +12,7 @@ usage:
                                      file whose path has no space
 
 The no-space card is an empty card with one file, FILLER.BIN, that leaves
-NOSPACE_FREE bytes free.
+NOSPACE_FREE bytes free. The big card holds one file, BIG.BIN, of BIG_SIZE bytes.
 
 The fixture is the folder data/fixture next to this tool's folder. Git keeps no
 empty folders, so EMPTY_DIRS names the ones to make. Needs mtools and mkfs.vfat.
@@ -30,6 +30,8 @@ FIXTURE = os.path.join(HERE, '..', 'data', 'fixture')
 SECOND_MIB = 64
 SECOND_LBA = 2048
 NOSPACE_FREE = 512 * 1024
+# Over 1 MiB, so a copy's count goes from K to M
+BIG_SIZE = 1500000
 ENV = dict(os.environ, MTOOLS_SKIP_CHECK='1')
 
 # Attributes the card holds. A server folder cannot hold them, so no scenario compares them.
@@ -70,7 +72,7 @@ def files(root):
 
 def digest():
     h = hashlib.sha256(repr((sorted(files(FIXTURE).items()), sorted(ATTRS.items()),
-                             EMPTY_DIRS, SECOND_MIB, NOSPACE_FREE)).encode())
+                             EMPTY_DIRS, SECOND_MIB, NOSPACE_FREE, BIG_SIZE)).encode())
     return h.hexdigest()[:12]
 
 
@@ -140,6 +142,17 @@ def nospace_card(path, folder):
         sys.exit('the no-space card has %d bytes free, more than %d' % (left, NOSPACE_FREE))
 
 
+def big_card(path, folder):
+    blank_card(path)
+    big = os.path.join(folder, 'BIG.BIN')
+    with open(big, 'wb') as f:
+        f.write((bytes(range(256)) * (BIG_SIZE // 256 + 1))[:BIG_SIZE])
+    try:
+        run(['mcopy', '-i', spec(path), '-n', '-Q', big, '::/'])
+    finally:
+        os.remove(big)
+
+
 def extract(image, out):
     """Copy the files of a card to OUT. Entries are copied one by one, because
     mcopy of "::/" alone leaves out hidden ones."""
@@ -173,6 +186,7 @@ def build(images):
     full = os.path.join(folder, 'second-full-%s.img' % d)
     empty = os.path.join(folder, 'second-empty-%s.img' % d)
     nospace = os.path.join(folder, 'second-nospace-%s.img' % d)
+    big = os.path.join(folder, 'second-big-%s.img' % d)
     for old in os.listdir(folder):
         if old.endswith('.img') and d not in old:
             os.remove(os.path.join(folder, old))
@@ -195,9 +209,13 @@ def build(images):
     if not os.path.exists(nospace):
         nospace_card(nospace + '.part', folder)
         os.rename(nospace + '.part', nospace)
+    if not os.path.exists(big):
+        big_card(big + '.part', folder)
+        os.rename(big + '.part', big)
     print(full)
     print(empty)
     print(nospace)
+    print(big)
 
 
 def main(argv):

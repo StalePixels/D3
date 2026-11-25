@@ -51,12 +51,15 @@ static unsigned char old_scr_ct;
 // Runs at every exit, also after BREAK or a BASIC error at "scroll?", and
 // with the bank paged in or not: a copy that is not complete is deleted.
 // The home page goes back at $C000 first, because NBN_Free is an M_P3DOS
-// call. The bank is paged in last: an error message from xcopy.asm or
-// nbn/messages.asm is in the bank, and the CRT copies it after this.
+// call. A progress line is ended after nbn_exit has put the screen back,
+// so that the error message starts on a line of its own. The bank is
+// paged in last: an error message from xcopy.asm or nbn/messages.asm is
+// in the bank, and the CRT copies it after this.
 static void xcopy_exit(void)
 {
     xc_page_home();
     nbn_exit();
+    progress_end();
 
     if (fout != 0xff) {
         esx_f_close(fout);

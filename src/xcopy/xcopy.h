@@ -111,6 +111,12 @@ void ui_check_break(void);
 char ui_ask(const char *keys);
 void ui_error(const char *path, xc_err_t err);
 
+// progress.c
+void progress_path(void);
+void progress_start(uint32_t size);
+void progress_add(uint16_t n) __z88dk_fastcall;
+void progress_end(void);
+
 // copy.c
 extern unsigned char copy_buffer[2048];
 void copy_file(const char *sfn, const char *lfn, uint8_t attr);

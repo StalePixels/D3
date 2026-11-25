@@ -145,8 +145,10 @@ xcopy_d3: deps dirs
 # 2K below it for the stack.
 XCOPY_CZFLAGS = -Cz="--clean --fullsize --main-fence 0xB7E0"
 
+# nbn.c ends the progress line before each message it prints
 xcopy: deps dirs xcopy_d3
-	$(CC) $(CCFLAGS) $(INCFLAGS) $(LDFLAGS) @$(CURDIR)/src/xcopy.lst XCOPY_D3.o \
+	$(CC) $(CCFLAGS) $(INCFLAGS) $(LDFLAGS) -DNBN_PRINT_HOOK=progress_end \
+		@$(CURDIR)/src/xcopy.lst XCOPY_D3.o \
 		-oXCOPY -create-app -subtype=dotn $(XCOPY_CZFLAGS)
 	$(MV) $(TMP_DIR)/XCOPY $(BUILD_DIR)/XCOPY.DOT
 

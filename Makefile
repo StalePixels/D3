@@ -54,7 +54,7 @@ DATE := `which date`
 
 default: q_less
 
-all: ini every untar ch8show inkey less xcopy gunzip
+all: ini every untar ch8show inkey less xcopy gunzip telnet
 
 # clean removes the development build. rel-clean also removes the release
 # build and the release copies, which are in git.
@@ -159,6 +159,28 @@ q_xcopy: xcopy install_xcopy
 
 uninstall_xcopy:
 	$(RM) $(INSTALL_BASE)/dot/XCOPY
+
+
+#
+# TELNET
+#
+# The stack starts at $C000 (REGISTER_SP in src/telnet.c). The fence keeps
+# 2K below it for the stack. --fullsize gives the command $C000-$FFFF too:
+# the receive ring is there, in MMU7 (src/telnet/telnet.h).
+TELNET_CZFLAGS = -Cz="--clean --fullsize --main-fence 0xB800"
+
+telnet: deps dirs
+	$(CC) $(CCFLAGS) $(INCFLAGS) $(LDFLAGS) @$(CURDIR)/src/telnet.lst \
+		-oTELNET -create-app -subtype=dotn $(TELNET_CZFLAGS)
+	$(MV) $(TMP_DIR)/TELNET $(BUILD_DIR)/TELNET.DOT
+
+install_telnet:
+	$(CP) $(BUILD_DIR)/TELNET.DOT $(INSTALL_BASE)/dot/TELNET
+
+q_telnet: telnet install_telnet
+
+uninstall_telnet:
+	$(RM) $(INSTALL_BASE)/dot/TELNET
 
 
 #

@@ -1,0 +1,14 @@
+# .TELNET opens a telnet link to the harness echo server through the ESP.
+# tools/telnet-probe.lua types keys, opens and closes the EDIT menu, sends
+# a block of data, and leaves with EDIT, then Q; run.sh checks the bytes the server got (see test/README.md).
+# It runs at real speed, as all Next network software must.
+server echo 7777
+put @DOTS@/TELNET.DOT /dot/TELNET
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart .TELNET 127.0.0.1 7777
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 40
+noreset 7.5
+screen 39 Connection closed
+screen 39 AFTER

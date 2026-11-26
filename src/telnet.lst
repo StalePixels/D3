@@ -1,0 +1,14 @@
+telnet.c
+telnet/takeover.c
+telnet/screen.c
+telnet/uart.c
+telnet/hooks.c
+telnet/keys.c
+telnet/protocol.c
+telnet/esp.c
+telnet/term.asm
+telnet/irq.asm
+telnet/rx.asm
+telnet/keyq.asm
+telnet/data.asm
+common/d3.c

@@ -1,0 +1,19 @@
+# .XCOPY copies one file of 1500000 bytes from the second SD card (D:) to the
+# boot card. Its count goes from K to M, where "1022K/1.4M" becomes the shorter
+# "1.0M/1.4M", and ends as "1.4M/1.4M". The line after the command reads that
+# row back from the screen with SCREEN$, one column past the count, and prints
+# it in brackets: a character left over from a longer count shows before "]".
+no-network
+mame -nothrottle -hard2 @CARD@
+put @DOTS@/XCOPY.DOT /dot/XCOPY
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart POKE 23692,7
+autostart .XCOPY "D:/BIG.BIN" "C:/"
+autostart LET s=PEEK 23692:LET r=24-PEEK 23689:LET a$="":FOR c=0 TO 20:LET a$=a$+SCREEN$ (r-2,c):NEXT c:POKE 23692,255:PRINT "SCR ";s:PRINT "[";a$;"]"
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 60
+screen 59 AFTER
+screen 59 SCR 7
+screen 59 C:/BIG.BIN 1.4M/1.4M
+screen 59 [C:/BIG.BIN 1.4M/1.4M ]

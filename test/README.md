@@ -49,7 +49,7 @@ Each command runs with the ROM's scroll count (SCR_CT, 23692) set to 7, and the 
 | `less-break` | `.LESS` opens a text file, and BREAK returns to BASIC. LESS waits for the key to go up, so the next line runs, and NextRegs 0x56 and 0x57 (MMU6 and MMU7) read the same as before the command. |
 | `gunzip` | `.GUNZIP` on a file that `gzip` made on the Mac gives the original, byte for byte. |
 | `telnet` | `.TELNET` opens a telnet link through the ESP to an echo server. Typed keys reach the server as the right bytes (BREAK as ESC, EXTEND + B as code 2), EDIT opens the menu in the status bar and another key closes it, a block of data comes back whole, and EDIT, then Q closes the link and puts the machine back. See below. |
-| `telnet-banner` | `.TELNET` to a server that sends telnet commands and text as the link opens. The text shows and the commands do not, the server gets the refusals, and a cursor key sends ESC O A once the server has set DECCKM. See below. |
+| `telnet-banner` | `.TELNET` to a server that sends telnet commands and text as the link opens. The text shows and the commands do not. The server gets WONT for DO TTYPE and DO for WILL ECHO. It offers ECHO twice and gets one DO. A cursor key sends ESC O A once the server has set DECCKM. See below. |
 | `telnet-badhost` | `.TELNET` to a host name that does not resolve puts the machine back and returns error 255 with the ESP's message, `DNS Fail`. See below. |
 | `telnet-pi` | `.TELNET -pi`, with Layer 2 and sprites on before it starts, takes over the machine with the Pi's UART and puts it back. Typed keys go out as their bytes, with no AT commands. See below. |
 | `telnet-err` | `.TELNET` with a port number out of range shows its help and returns error 255, and the line after it does not run. |

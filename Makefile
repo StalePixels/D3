@@ -100,7 +100,7 @@ incs: dirs
 
 release: ZOPT = $(RELEASE_ZOPT)
 release: BUILD_DIR = $(REL_BUILD_DIR)
-release: ini every untar ch8show inkey less xcopy gunzip
+release: ini every untar ch8show inkey less xcopy gunzip telnet
 	$(MKDIR) $(RELEASE_DIR)
 	$(CP) $(BUILD_DIR)/INI.DOT $(RELEASE_DIR)/INI
 	$(CP) $(BUILD_DIR)/EVERY.DOT $(RELEASE_DIR)/EVERY
@@ -110,10 +110,11 @@ release: ini every untar ch8show inkey less xcopy gunzip
 	$(CP) $(BUILD_DIR)/LESS.DOT $(RELEASE_DIR)/LESS
 	$(CP) $(BUILD_DIR)/XCOPY.DOT $(RELEASE_DIR)/XCOPY
 	$(CP) $(BUILD_DIR)/GUNZIP.DOT $(RELEASE_DIR)/GUNZIP
+	$(CP) $(BUILD_DIR)/TELNET.DOT $(RELEASE_DIR)/TELNET
 
-install: install_every install_ini install_untar install_ch8show install_inkey install_less install_xcopy install_gunzip
+install: install_every install_ini install_untar install_ch8show install_inkey install_less install_xcopy install_gunzip install_telnet
 
-uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_inkey uninstall_less uninstall_xcopy uninstall_gunzip
+uninstall: uninstall_every uninstall_ini uninstall_untar uninstall_ch8show uninstall_inkey uninstall_less uninstall_xcopy uninstall_gunzip uninstall_telnet
 
 
 #

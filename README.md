@@ -20,6 +20,10 @@ Best taken with https://github.com/StalePixels/SPUI
 
 .GUNZIP - Decompress a gzip file and keep the original. FILE.gz gives FILE, and FILE.tgz gives FILE.tar for .UNTAR.
 
+.TELNET - Telnet client on the ESP WiFi module, with an 80x24 ANSI terminal on the tilemap. It takes over the screen and puts everything back when you leave.
+`.TELNET host [port]` connects, on port 23 when there is no port. `.TELNET -pi` is an ANSI terminal on the Pi UART instead.
+EDIT opens the menu, and Q in the menu leaves. BREAK sends ESC.
+
 Notable Changes
 -
 * V 0.1.0         First stable public, with INI

@@ -315,7 +315,7 @@ end
 local cells_before_menu
 
 local BANNER_TEXT = "BANNER-START\255BANNER-END"
-local BANNER_ANSWERS = "\255\252\24\255\254\1"    -- WONT TTYPE, DONT ECHO
+local BANNER_ANSWERS = "\255\252\24\255\253\1"    -- WONT TTYPE, DO ECHO (once)
 local BANNER_UP = "\27OA"                         -- cursor up with DECCKM on
 
 local function write_server_hex(s)

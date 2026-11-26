@@ -35,6 +35,11 @@
 #define GOT_ERROR           2
 #define GOT_TIMEOUT         3
 
+// The longest wait for the answer to a command. A busy ESP can take
+// seconds to answer even AT; a shorter wait lets its late answer be
+// taken as the answer to the next command.
+#define ANSWER_SECONDS      10
+
 // The error for BASIC: the ESP's message, last character with bit 7 set
 char tn_esp_error[33];
 
@@ -220,11 +225,13 @@ const char *tn_esp_open(void)
     fps = (tn_nr_read(0x05) & 0x04) ? 60 : 50;
 
     // The first AT can meet the end of something else in the ESP's
-    // buffer, and get ERROR.
-    do got = command("AT", WAIT_OK, 1); while (got != GOT_OK && --tries);
+    // buffer, and get ERROR: then it goes again. An ESP that does not
+    // answer is busy, and another AT only adds to its work, so a timeout
+    // ends the tries.
+    do got = command("AT", WAIT_OK, ANSWER_SECONDS); while (got == GOT_ERROR && --tries);
     if (got != GOT_OK) return error(got);
 
-    got = command("AT+CIPMODE=1", WAIT_OK, 2);
+    got = command("AT+CIPMODE=1", WAIT_OK, ANSWER_SECONDS);
     if (got != GOT_OK) return error(got);
 
     put_str("AT+CIPSTART=\"TCP\",\"");
@@ -234,7 +241,7 @@ const char *tn_esp_open(void)
     got = command("", WAIT_OK, 20);
     if (got != GOT_OK) return error(got);
 
-    got = command("AT+CIPSEND", WAIT_PROMPT, 3);
+    got = command("AT+CIPSEND", WAIT_PROMPT, ANSWER_SECONDS);
     if (got != GOT_OK) return error(got);
 
     return 0;
@@ -245,6 +252,6 @@ void tn_esp_close(void)
     quiet(1);
     put_str("+++");
     quiet(1);
-    command("AT+CIPMODE=0", WAIT_OK, 2);
-    command("AT+CIPCLOSE", WAIT_OK, 3);         // CLOSED, then OK
+    command("AT+CIPMODE=0", WAIT_OK, ANSWER_SECONDS);
+    command("AT+CIPCLOSE", WAIT_OK, ANSWER_SECONDS);         // CLOSED, then OK
 }

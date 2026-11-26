@@ -1,6 +1,10 @@
 Changelog
 =
 
+v0.7.0 (WIP)
+-
+ - NEW: .TELNET added
+
 v0.6.0
 -
  - NEW: .XCOPY added

@@ -41,6 +41,17 @@ static int verify_checksum(const char *p)
     return (u == cs);
 }
 
+// The open files, 0xff when none
+static unsigned char tar_file = 0xff;
+static unsigned char file_out = 0xff;
+
+// Runs at every exit, through atexit: the end of the tar file, an error, or a
+// BASIC error during output
+static void untar_exit(void) {
+    if (file_out != 0xff) esxdos_f_close(file_out);
+    if (tar_file != 0xff) esxdos_f_close(tar_file);
+}
+
 void untar(unsigned char tar_in, const char *path)
 {
     /*
@@ -50,9 +61,11 @@ void untar(unsigned char tar_in, const char *path)
      *
      */
     char buff[512];
-    unsigned char file_out = 0;
     size_t bytes_read;
     uint32_t filesize;
+
+    tar_file = tar_in;
+    atexit(untar_exit);
 
     printf("Extracting from %s\n", path);
 
@@ -109,18 +122,22 @@ void untar(unsigned char tar_in, const char *path)
             }
             if (filesize < 512)
                 bytes_read = filesize;
-            if (file_out != 0) {
+            if (file_out != 0xff) {
                 if (esxdos_f_write(file_out, buff, bytes_read) != bytes_read) {
+                    // Keep the write's error for BASIC: the close can change errno
+                    int err = errno;
                     printf("Failed write\n");
                     esxdos_f_close(file_out);
-                    tar_in = 0;
+                    file_out = 0xff;
+                    errno = err;
+                    return;
                 }
             }
             filesize -= bytes_read;
         }
-        if (file_out) {
+        if (file_out != 0xff) {
             esxdos_f_close(file_out);
-            file_out = 0;
+            file_out = 0xff;
         }
     }
 }

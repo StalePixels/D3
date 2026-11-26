@@ -1,6 +1,5 @@
 // I'm a banker, move my stack down...
 #pragma output REGISTER_SP = 0xBFE0
-#pragma printf = "%d %s %c %X %lu %f lx %x"
 
 #include <z80.h>
 #include <arch/zxn.h>
@@ -12,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/build.h"
+#include "build.h"
 #include "common/d3.h"
 #include "common/startup.h"
 #include "less/less.h"
@@ -88,5 +87,5 @@ int main(int argc, char **argv)
 
     esxdos_f_close(text_in);
 
-    exit(0);
+    return 0;
 }

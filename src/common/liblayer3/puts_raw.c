@@ -9,7 +9,7 @@
 
 #include "liblayer3.h"
 
-void l3_puts_raw(const char* s, const uint8_t len)
+void l3_puts_raw(const char* s, uint8_t len)
 {
 
 	while (len--)

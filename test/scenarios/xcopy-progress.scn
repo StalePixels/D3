@@ -1,0 +1,17 @@
+# .XCOPY copies one file of 70001 bytes, in many reads, from the second SD card
+# (D:) to the boot card. The count after its name goes back over itself, and
+# ends with the bytes done equal to the total.
+no-network
+mame -nothrottle -hard2 @CARD@
+put @DOTS@/XCOPY.DOT /dot/XCOPY
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart POKE 23692,7
+autostart .XCOPY "D:/OVER-64K.BIN" "C:/"
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "SCR ";s
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 30
+screen 29 AFTER
+screen 29 SCR 7
+screen 29 C:/OVER-64K.BIN 68K/68K
+check /OVER-64K.BIN @DATA@/fixture/OVER-64K.BIN

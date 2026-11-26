@@ -81,8 +81,8 @@ extern void l3_newline(void);
 extern void l3_clear_to_eol(void);
 extern void l3_revon(void);
 extern void l3_revoff(void);
-extern void l3_init();
-extern void l3_exit();
+extern void l3_init(void);
+extern void l3_exit(void);
 
 #define LIBLAYER3_SCREENWIDTH 80
 #define LIBLAYER3_SCREENHEIGHT 32

@@ -5,5 +5,5 @@
 #ifndef D3_D3_H
 #define D3_D3_H
 
-void d3_logo();
+void d3_logo(void);
 #endif //D3_D3_H

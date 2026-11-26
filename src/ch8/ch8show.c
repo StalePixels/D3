@@ -35,8 +35,8 @@ void ch8show(unsigned char file_in, uint8_t glyphs, uint8_t row) {
                 printf(" %c= ", ascii);
             }
 
-            for (uint8_t prow = 0; prow < 8; ++prow) {
-                uint16_t addr = zx_pxy2saddr(24 + (col * 32), prow + (row * 8));
+            for (volatile uint8_t prow = 0; prow < 8; ++prow) {
+                unsigned char *addr = zx_pxy2saddr(24 + (col * 32), prow + (row * 8));
                 errno = esxdos_f_read(file_in, addr, 1);
             }
 

@@ -1,0 +1,15 @@
+# .GUNZIP on a gzip file made on the Mac: the output is the original, byte for byte.
+no-network
+mame -nothrottle
+put @DOTS@/GUNZIP.DOT /dot/GUNZIP
+put @WORK@/D3.TAR.GZ /D3.TAR.GZ
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart POKE 23692,7
+autostart .GUNZIP /D3.TAR.GZ
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "SCR ";s
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 40
+screen 39 AFTER
+screen 39 SCR 7
+check /D3.TAR @DATA@/d3.tar

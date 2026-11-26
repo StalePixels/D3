@@ -35,7 +35,7 @@ uint8_t LogoTile2[8] = {
         0b11111111,
 };
 
-void l3_init() {
+void l3_init(void) {
     // We're going to trash this area for the Editor canvas, so let's back it up so we can restore it
     memcpy(L3tilemap, tilemap, sizeof(L3tilemap));
     memcpy(L3tiles, tiles, sizeof(L3tiles));
@@ -43,8 +43,8 @@ void l3_init() {
     dzx7_standard(L3font, ((unsigned char *)0x5D00));           // Not the entire tileset, because we don't
                                                                 //  have the first 32 glyphs
     // And copy in our logo characters
-    memcpy(tiles[30], LogoTile1, 8);
-    memcpy(tiles[31], LogoTile2, 8);
+    memcpy(tiles[30].bmp, LogoTile1, 8);
+    memcpy(tiles[31].bmp, LogoTile2, 8);
 
     // 0x6E (110) R/W =>  Tilemap Base Address
     //  bits 7-6 = Read back as zero, write values ignored

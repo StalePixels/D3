@@ -1,12 +1,19 @@
 Changelog
 =
 
+v0.6.0
+-
+ - NEW: .XCOPY added
+ - NEW: .GUNZIP added
+ - FIX: .INI reads a last line that has no newline
+ - FIX: .UNTAR returns no error when the directories already exist
+ - FIX: Commands restore the ROM scroll count (SCR_CT) when they exit
+
 v0.5.0
 -
  - NEW: .LESS added
  - FIX: Use _SYSFAR_ATTR_P for the default colours 
     ( Idea Credit Kris Borowinski )
-   
  
 v0.4.2
 -

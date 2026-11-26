@@ -1,0 +1,18 @@
+# .UNTAR extracts a tar file with a "./" entry for the current folder, and
+# returns no error for that entry.
+no-network
+mame -nothrottle
+put @DOTS@/UNTAR.DOT /dot/UNTAR
+put @DATA@/examples.tar /EXAMPLES.TAR
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart POKE 23692,7
+autostart .UNTAR /EXAMPLES.TAR
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "SCR ";s
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 16
+screen 15 AFTER
+screen 15 SCR 7
+check /everyNet.bas @DATA@/examples/everyNet.bas
+check /everyTwo.bas @DATA@/examples/everyTwo.bas
+check /every.bas @DATA@/examples/every.bas

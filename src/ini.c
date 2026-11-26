@@ -1,7 +1,6 @@
 //
 // Created by D Rimron-Soutter on 3/11/2020.
 //
-#pragma define CLIB_EXIT_STACK_SIZE = 1
 
 #include <z80.h>
 #include <arch/zxn.h>
@@ -13,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common/build.h"
+#include "build.h"
 #include "common/d3.h"
 #include "common/startup.h"
 
@@ -24,7 +23,7 @@ uint16_t old_counter = 0;
 uint8_t verbose = 0;
 
 const char *database;
-const char *tmp_filename[] = "/TMP/INI$$$$$.TMP";
+char tmp_filename[] = "/TMP/INI$$$$$.TMP";
 
 char *user_key;
 
@@ -42,7 +41,7 @@ const char *help_text[] = {
 
 };
 
-void exit_with_help() {
+void exit_with_help(void) {
     d3_logo(); printf(" INI\n");
     for(uint8_t help=0;help<8;help++)
         printf("%s\n", help_text[help]);
@@ -79,5 +78,5 @@ int main(int argc, char** argv) {
             if (verbose) printf("KEY \"%s\" not found\n", argv[2]);
         }
     }
-    exit(errno);
+    return errno;
 }

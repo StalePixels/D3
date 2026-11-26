@@ -1,0 +1,163 @@
+//
+// Created by D Rimron-Soutter on 31/03/2020.
+//
+
+#ifdef __ZXNEXT
+#include <arch/zxn.h>
+#include <arch/zxn/esxdos.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include "nbn.h"
+#include "uart.h"
+#include "messages.h"
+#include "net.h"
+
+// A client with its own line open on screen, such as a progress count, builds with
+// -DNBN_PRINT_HOOK=name, and void name(void) ends that line before each message printed here
+#ifdef NBN_PRINT_HOOK
+void NBN_PRINT_HOOK(void);
+#define NBN_PrintBegin()        NBN_PRINT_HOOK()
+#else
+#define NBN_PrintBegin()
+#endif
+
+unsigned char nbnBuff[260];
+uint16_t nbnFileBlockSize = NBN_MAX_BLOCKSIZE;
+
+#ifdef __ZXNEXT
+uint8_t nbnInts;
+#endif
+
+unsigned char NBN_GetStatus(void) {
+    unsigned char status[4];
+    status[0] = UART_GetUChar();
+    status[1] = UART_GetUChar();
+    status[2] = UART_GetUChar();
+    status[3] = 0;
+
+    if(!((status[0] == NBN_BLOCK_SUCCESS || status[0] == NBN_BLOCK_FAIL) && status[1] == '\x0D' && status[2] == '\x0A')) {
+        NBN_PrintBegin();
+        printf("%s", status);
+        UART_WaitOK(true);
+        NBN_Fail(err_nbn_protocol);
+    }
+    return(status[0]);
+}
+
+bool NBN_GetBlock(uint16_t blockSize) __z88dk_fastcall {
+    uint8_t nbnComputed = 0;
+
+    NBN_IntsOff();
+    NBN_PageIn();
+    for(uint16_t nbnByte = 0; nbnByte < blockSize; nbnByte++) {
+        nbnBlock[nbnByte] = NET_GetUChar();
+        // #1. This is basically a glorious hack, keep adding bytes to an uint8, then...
+        nbnComputed = nbnComputed + nbnBlock[nbnByte];
+        zx_border(nbnBlock[nbnByte]%8);
+    }
+    NBN_PageOut();
+    NBN_IntsBack();
+
+    uint8_t nbnChecksum =  NET_GetUChar();
+
+    // #2. ...only care about the final result. "Free" mod256 maths
+    if(nbnChecksum == nbnComputed) {
+        return true;
+    }
+    NBN_PrintBegin();
+    printf("Checksum %d/%d\n\n", nbnComputed, nbnChecksum);
+    return false;
+}
+
+// .XCOPY: send blockSize bytes from nbnBlock, then their checksum. Returns the
+// server's answer: NBN_BLOCK_SUCCESS, or NBN_BLOCK_FAIL to send the block again.
+unsigned char NBN_PutBlock(uint16_t blockSize) __z88dk_fastcall {
+    uint8_t nbnComputed = 0;
+
+    NBN_IntsOff();
+    NBN_PageIn();
+    for(uint16_t nbnByte = 0; nbnByte < blockSize; nbnByte++) {
+        nbnComputed = nbnComputed + nbnBlock[nbnByte];
+        UART_PutCh(nbnBlock[nbnByte]);
+    }
+    NBN_PageOut();
+    NBN_IntsBack();
+
+    UART_PutCh(nbnComputed);
+    return NBN_GetStatus();
+}
+
+bool NBN_CheckVersionByte(bool fatal) __z88dk_fastcall {
+    errno = NET_GetUChar();
+    bool pass = true;
+
+    if(errno!=NBN_PROTOCOL_VERSION) {              // VALIDATE PROTOCOL VERSION
+        if(errno&64) {          // And, check that the character was ASCII, Protocols only ever go up to V63,
+            //  so if we get back a bit7(64+) char, we know it's not a protocol header...
+            //
+            // Now generate an error, the first character of which is already in errno...
+            NBN_PrintBegin();
+            printf("\n Server Said: %c", errno);
+            NET_WaitOK(true);
+            if(fatal) {
+                NBN_Fail(err_nbn_protocol);
+            }
+            else {
+                pass = false;
+            }
+        }
+        if(fatal) {
+            NBN_Fail(err_wrong_version);
+        }
+        else {
+            pass = false;
+        }
+    }
+
+    return pass;
+}
+
+void NBN_ParseDirectoryHeader(nbnDirectory_t *dir)  __z88dk_fastcall  {
+    NBN_CheckVersionByte(true);
+    // Get the DIRHEADER
+    // Copy the filename
+    uint8_t dirLen = 0;
+    uint8_t chr = NET_GetUInt8();
+    while(chr) {
+        dir->currentPath[dirLen++] = chr;
+        chr = NET_GetUInt8();
+    }
+    // now add the NULL
+    dir->currentPath[dirLen] = chr;
+    NET_GetUInt16((uint8_t *)&(dir->totalEntries));
+    NET_GetUInt16((uint8_t *)&(dir->currentPage));
+    dir->currentPageSize = NET_GetUChar();
+    NET_GetUInt16((uint8_t *)&(dir->totalPages));
+}
+
+unsigned char NBN_ChangeDirectory(char *dir) __z88dk_fastcall {
+    sprintf(nbnBuff, "CD %s\x0A\x0D", dir);
+    NET_Send(nbnBuff, strlen(nbnBuff));
+
+    return NBN_GetStatus();
+}
+
+void NBN_GetDirectory(nbnDirectory_t *dir)  __z88dk_fastcall  {
+    sprintf(nbnBuff, "DIR %d\x0A\x0D", dir->currentPage);
+    NET_Send(nbnBuff, strlen(nbnBuff));
+
+    // Get the DIRHEADER
+    NBN_ParseDirectoryHeader(dir);
+    uint16_t nbnBlockSize;
+    NET_GetUInt16((uint8_t *)&nbnBlockSize);
+
+    // nbnBlock is the two 8K pages
+    if(nbnBlockSize > NBN_LARGE_BLOCKSIZE)
+        NBN_Fail(err_nbn_protocol);
+
+    if(!NBN_GetBlock(nbnBlockSize))
+        NBN_Fail(err_transfer_error);
+}

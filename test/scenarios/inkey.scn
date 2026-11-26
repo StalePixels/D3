@@ -1,0 +1,18 @@
+# .INKEY shows the code of a held key (a is 97), and returns to BASIC on code 3,
+# which is EXTEND with C.
+no-network
+mame -nothrottle
+put @DOTS@/INKEY.DOT /dot/INKEY
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart POKE 23692,7
+autostart .INKEY
+autostart LET s=PEEK 23692:POKE 23692,255:PRINT "SCR ";s
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 20
+keytiming 2 0.5 0.5
+key 10 a
+key 14 {EXTC}
+screen 10.6 INKEY read: 97
+screen 19 AFTER
+screen 19 SCR 7

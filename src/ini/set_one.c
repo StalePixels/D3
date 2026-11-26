@@ -20,7 +20,7 @@ bool ini_set_one(const char *filename, const char *key, const char *value) {
     if(errno==5) {
         file_exists = false;
         errno = 0;
-        ini_out = create_file(filename);
+        ini_out = create_file((char *)filename);
     }
     else if(!errno) {
         ini_out = create_file(tmp_filename);

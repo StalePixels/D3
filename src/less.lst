@@ -7,4 +7,3 @@ common/d3.c
 common/startup.c
 common/palette.c
 
-../LESS_LAYER3.o

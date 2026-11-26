@@ -1,0 +1,13 @@
+# How fast the .TELNET terminal takes bytes, and a long stream fed at the
+# rate of 115,200 baud. tools/telnet-term-probe.lua (TELNET_TERM_MODE=speed)
+# feeds the streams, writes the rates and presses EDIT, then Q (see test/README.md).
+no-network
+mame -nothrottle
+put @DOTS@/TELNET.DOT /dot/TELNET
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart .TELNET -pi
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 60
+noreset 7.5
+screen 59 AFTER

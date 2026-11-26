@@ -1,0 +1,16 @@
+# .TELNET to the harness banner server, which sends telnet commands (DO
+# TTYPE, WILL ECHO, a subnegotiation, WONT SGA), text with IAC IAC in it,
+# and ESC [ ? 1 h (DECCKM on) as soon as the link opens.
+# tools/telnet-probe.lua checks the text on the screen, presses cursor up
+# and leaves with EDIT, then Q; run.sh checks the server got WONT TTYPE, DONT
+# ECHO and ESC O A, and nothing else (see test/README.md). Real speed.
+server banner 7777 \xff\xfd\x18\xff\xfb\x01\xff\xfa\x18\x01\xff\xf0\xff\xfc\x03BANNER-START\xff\xffBANNER-END\r\n\x1b[?1h
+put @DOTS@/TELNET.DOT /dot/TELNET
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart .TELNET 127.0.0.1 7777
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 40
+noreset 7.5
+screen 39 Connection closed
+screen 39 AFTER

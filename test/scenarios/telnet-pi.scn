@@ -1,0 +1,15 @@
+# .TELNET -pi takes over the machine with the Pi's UART, and puts the
+# machine back. Layer 2 and sprites are on before it starts, and must be
+# off during the session and on again after it. tools/telnet-probe.lua
+# does the checks, types keys and leaves with EDIT, then Q (see test/README.md).
+no-network
+mame -nothrottle
+put @DOTS@/TELNET.DOT /dot/TELNET
+autostart ON ERROR ERROR TO e,l:LAYER 0:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart LAYER 2,1:SPRITE PRINT 1
+autostart .TELNET -pi
+autostart LAYER 0:POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 20
+noreset 7.5
+screen 19 AFTER

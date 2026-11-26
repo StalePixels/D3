@@ -13,6 +13,7 @@ REPO=$(dirname "$HERE")
 die() { echo "run.sh: $*" >&2; exit 2; }
 
 ALL="ini ini-lastline every untar untar-existing untar-examples untar-filefirst untar-scroll untar-nospace ch8show inkey less less-break gunzip
+     telnet telnet-banner telnet-badhost telnet-pi telnet-err telnet-term telnet-term-speed
      xcopy-local xcopy-scroll xcopy-progress xcopy-progress-mb xcopy-err crash-detect
      xcopy-up xcopy-down xcopy-progress-up xcopy-progress-down"
 # The scenarios that use the NBN server. They run at the same time, at real speed.
@@ -120,7 +121,7 @@ fi
 # Makes $WORK/scn/NAME.scn from the template, runs it, and writes
 # $WORK/out/NAME.txt (what to show on a failure) and $WORK/out/NAME.res (PASS or FAIL).
 run_scn() {
-    local n=$1 card= src= post=
+    local n=$1 card= src= post= probe= probefile=telnet-probe.lua serverlog=
     local scn=$WORK/scn/$n.scn out=$WORK/out/$n.txt
     case $n in
         gunzip)      gzip -n -c "$HERE/data/d3.tar" >"$WORK/D3.TAR.GZ" ;;
@@ -134,6 +135,12 @@ run_scn() {
         xcopy-err)   src=$EMPTY ;;
         xcopy-down)  src=$EMPTY; post=down ;;
         untar-nospace) src=$NOSPACE ;;
+        telnet)      probe=echo; serverlog=server-echo-7777.log ;;
+        telnet-banner) probe=banner; serverlog=server-banner-7777.log ;;
+        telnet-badhost) probe=badhost ;;
+        telnet-pi)   probe=pi ;;
+        telnet-term) probe=functions; probefile=telnet-term-probe.lua ;;
+        telnet-term-speed) probe=speed; probefile=telnet-term-probe.lua ;;
     esac
     if [ -n "$src" ]; then
         card=$D3_TEST_IMAGES/cards/$n.img
@@ -144,7 +151,13 @@ run_scn() {
         -e "s|@CARD@|$card|g" -e "s|@PORT@|$PORT|g" "$HERE/scenarios/$n.scn" >"$scn"
     [ "$n" = xcopy-local ] && python3 "$HERE/tools/cards.py" checks /xl >>"$scn"
 
-    timeout -k 10 900 "$PINESY_HARNESS/run.py" "$scn" >"$out" 2>&1
+    if [ -n "$probe" ]; then
+        PINESY_HARNESS_PROBE=$HERE/tools/$probefile TELNET_PROBE_MODE=$probe TELNET_TERM_MODE=$probe \
+            TELNET_MAP=$DOTS/tmp/TELNET.map \
+            timeout -k 10 900 "$PINESY_HARNESS/run.py" "$scn" >"$out" 2>&1
+    else
+        timeout -k 10 900 "$PINESY_HARNESS/run.py" "$scn" >"$out" 2>&1
+    fi
     local rc=$?
     local ok=1
     if grep -q '^# expect-fail' "$scn"; then
@@ -152,6 +165,23 @@ run_scn() {
         [ $rc -eq 1 ] && echo "(the run failed, as this scenario expects)" >>"$out"
     else
         [ $rc -eq 0 ] || ok=
+    fi
+
+    # The probe's results: every check passed, and it got to the end.
+    if [ -n "$probe" ]; then
+        local res=$PINESY_HARNESS_RUNS/$n/latest/telnet-probe.txt
+        if [ ! -f "$res" ] || ! grep -q '^DONE' "$res" || grep -q '^FAIL' "$res"; then
+            ok=
+            { echo "telnet-probe.txt:"; cat "$res" 2>/dev/null; } >>"$out"
+        fi
+    fi
+    # The bytes the server got: the ones the probe wrote in telnet-server.hex
+    if [ -n "$serverlog" ]; then
+        local run=$PINESY_HARNESS_RUNS/$n/latest
+        if ! python3 "$HERE/tools/telnet-serverlog.py" "$run/$serverlog" \
+            "$(cat "$run/telnet-server.hex" 2>/dev/null)" >>"$out" 2>&1; then
+            ok=
+        fi
     fi
 
     # What the copy left behind, read from the card or the server folder.

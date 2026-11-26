@@ -1,0 +1,11 @@
+# .TELNET to a host name that does not resolve puts the machine back and
+# returns the ESP's error, which tools/telnet-probe.lua reads ("DNS Fail").
+# The line after it does not run. Real speed: the ESP asks the Mac's DNS.
+# No noreset line: NextZXOS runs from $0000 when ON ERROR traps an error.
+put @DOTS@/TELNET.DOT /dot/TELNET
+autostart ON ERROR ERROR TO e,l:POKE 23692,255:PRINT "ERR ";e;" ";l:FOR i=0 TO 1 STEP 0:NEXT i
+autostart .TELNET nosuch.invalid
+autostart POKE 23692,255:PRINT "AFTER"
+autostart FOR i=0 TO 1 STEP 0:NEXT i
+seconds 30
+screen 29 ERR 255
